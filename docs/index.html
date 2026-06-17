@@ -1439,6 +1439,13 @@ html, body {
     let off = (camX * factor) % spacing; if (off < 0) off += spacing;
     for (let sx = -off - spacing; sx < VW + spacing; sx += spacing) fn(sx);
   }
+  // [최적화] 월드좌표 x가 현재 화면(±m)에 보이는지
+  function vis(x, m) { return x >= camX - m && x <= camX + VW + m; }
+  // [최적화] step 격자 패턴을 보이는 구간만 반복하기 위한 [시작x, 끝x] (격자 위상 유지)
+  function tileRange(px, pw, step) {
+    const x0 = px + Math.max(0, Math.floor((camX - 24 - px) / step)) * step;
+    return [x0, Math.min(px + pw, camX + VW + 24)];
+  }
 
   // 정적 하늘(그라데이션 + 천체)을 오프스크린에 1회 렌더 → 캐시
   function renderSkyCache(S) {
@@ -1593,16 +1600,16 @@ html, body {
         ctx.fillStyle = P.gtop; ctx.fillRect(pl.x, pl.y, pl.w, 4);
         // 바닥 무늬(테마별)
         if (theme === "downtown") {                         // 차선
-          ctx.fillStyle = P.tile; for (let x = pl.x; x < pl.x + pl.w; x += 28) ctx.fillRect(x, pl.y + 16, 14, 3);
+          ctx.fillStyle = P.tile; const [a, b] = tileRange(pl.x, pl.w, 28); for (let x = a; x < b; x += 28) ctx.fillRect(x, pl.y + 16, 14, 3);
         } else if (theme === "bluehouse") {                 // 레드카펫
           ctx.fillStyle = P.tile; ctx.fillRect(pl.x, pl.y + 4, pl.w, 10);
           ctx.fillStyle = "rgba(255,220,120,0.3)"; ctx.fillRect(pl.x, pl.y + 4, pl.w, 1); ctx.fillRect(pl.x, pl.y + 13, pl.w, 1);
         } else if (theme === "market") {                    // 시장 멍석 패턴
-          ctx.fillStyle = P.tile; for (let x = pl.x; x < pl.x + pl.w; x += 8) ctx.fillRect(x, pl.y + 6, 4, 3);
+          ctx.fillStyle = P.tile; const [a, b] = tileRange(pl.x, pl.w, 8); for (let x = a; x < b; x += 8) ctx.fillRect(x, pl.y + 6, 4, 3);
         } else if (theme === "neon") {                       // 젖은 노면 반사 줄
-          ctx.fillStyle = "rgba(120,220,255,0.06)"; for (let x = pl.x; x < pl.x + pl.w; x += 6) ctx.fillRect(x, pl.y + 6, 1, VH - pl.y - 8);
+          ctx.fillStyle = "rgba(120,220,255,0.06)"; const [a, b] = tileRange(pl.x, pl.w, 6); for (let x = a; x < b; x += 6) ctx.fillRect(x, pl.y + 6, 1, VH - pl.y - 8);
         } else {                                             // 보도블럭
-          ctx.fillStyle = P.tile; for (let x = pl.x; x < pl.x + pl.w; x += 16) ctx.fillRect(x, pl.y + 6, 14, 2);
+          ctx.fillStyle = P.tile; const [a, b] = tileRange(pl.x, pl.w, 16); for (let x = a; x < b; x += 16) ctx.fillRect(x, pl.y + 6, 14, 2);
         }
       } else {
         // 2층 발코니 + 건물 벽
@@ -1854,11 +1861,12 @@ html, body {
     ctx.fillText(cntTxt, s.x, topY - 7);
   }
 
-  function drawSpots() { for (const s of spots) drawSpotOne(s); }
+  function drawSpots() { for (const s of spots) if (vis(s.x, 92)) drawSpotOne(s); }   // 화면 밖 스팟 건너뜀
 
   // 둥둥 떠다니는 장소 핀 — 최상단 뎁스(플레이어·단속반보다 앞)에서 그림
   function drawSpotPins() {
     for (const s of spots) {
+      if (!vis(s.x, 92)) continue;
       const hot = s.base >= 18, full = s.filled >= s.slots;
       const pinC = full ? "#5cff9e" : hot ? "#ffd24d" : "#ff5b6e";
       const py = (s._topY || s.y - 36) - 32 + Math.sin(performance.now() / 320 + s.x) * 3;
@@ -1943,7 +1951,7 @@ html, body {
       smoke: { glow: "150,225,255", col: "#aee6ff", label: "세상정지" },
     };
     for (const n of ninjas) {
-      if (n.taken) continue;
+      if (n.taken || !vis(n.x, 24)) continue;
       const K = KIND[n.kind] || KIND.cloak;
       const cy = n.y - 20 + Math.sin(performance.now() / 200 + n.x) * 2;
       // 글로우
@@ -1987,7 +1995,7 @@ html, body {
   function drawProps() {
     const now = performance.now();
     for (const q of props) {
-      if (q.kind === "dog") continue;               // 강아지는 별도 패스(스팟 앞)
+      if (q.kind === "dog" || !vis(q.x, 70)) continue;   // 강아지는 별도 패스 / 화면 밖 건너뜀
       const x = q.x, y = q.y;
       if (FILTER_OK) ctx.filter = "brightness(0.6)";   // 지원 시 필터, 미지원 시 색을 DK로 어둡게
       if (q.kind === "car") {
@@ -2020,7 +2028,7 @@ html, body {
   // 길거리 강아지 — 스팟보다 앞 뎁스로 별도 렌더
   function drawStreetDogs() {
     for (const q of props) {
-      if (q.kind !== "dog") continue;
+      if (q.kind !== "dog" || !vis(q.x, 24)) continue;
       const col = q.tint < 0.5 ? "#a9763f" : q.tint < 0.8 ? "#5a4a3a" : "#d8d2c4";
       drawDogSprite(q.x, q.y, col, q.dir, q.anim, q.moving);
       if (q.pettable && state === STATE.PLAYING) {
@@ -2036,7 +2044,7 @@ html, body {
     if (!coins) return;
     const now = performance.now();
     for (const c of coins) {
-      if (c.taken) continue;
+      if (c.taken || !vis(c.x, 16)) continue;
       const yy = c.y - 22 + Math.sin(now / 260 + c.phase) * 2;
       ctx.fillStyle = "rgba(0,0,0,0.25)"; ctx.beginPath(); ctx.arc(c.x, c.y - 2, 4, 0, 7); ctx.fill();   // 그림자
       ctx.fillStyle = "#e0a82a"; ctx.beginPath(); ctx.arc(c.x, yy, 5, 0, 7); ctx.fill();                 // 동전
@@ -2159,6 +2167,7 @@ html, body {
   function drawCitizens() {
     const now = performance.now();
     for (const c of citizens) {
+      if (!vis(c.x, 24)) continue;                       // 화면 밖 행인 건너뜀
       const angry = c.speechT > 0;                      // 신고 중 = 방방 뛰며 화남
       const jump = angry ? Math.abs(Math.sin(now / 90)) * 6 : 0;
       const x = c.x, y = c.lane - jump;                 // 점프 시 발끝이 들림
@@ -2225,6 +2234,7 @@ html, body {
 
   function drawEnforcers() {
     for (const e of enforcers) {
+      if (!vis(e.x, 60)) continue;                       // 화면 밖 단속반 건너뜀
       const x = e.x, y = e.lane;
 
       if (e.type === "car") {
