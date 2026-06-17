@@ -92,8 +92,22 @@ html, body {
       return px[0] < 40;
     } catch (e) { return false; }
   })();
-  const DIM6 = "rgba(0,0,0,0.4)";     // brightness(0.6)
-  const DIM78 = "rgba(0,0,0,0.22)";   // brightness(0.78)
+  const DIM78 = "rgba(0,0,0,0.22)";   // brightness(0.78) — 배경 건물(직사각형)용 오버레이
+  // filter 미지원 시 색 자체를 곱해 어둡게(그려진 픽셀만 어두워짐 → 사각형 박스 안 생김).
+  // filter 지원 시엔 패스스루(필터가 처리).
+  function darken(c, f) {
+    if (typeof c !== "string") return c;
+    if (c[0] === "#") {
+      let r, g, b;
+      if (c.length === 4) { r = parseInt(c[1] + c[1], 16); g = parseInt(c[2] + c[2], 16); b = parseInt(c[3] + c[3], 16); }
+      else { r = parseInt(c.slice(1, 3), 16); g = parseInt(c.slice(3, 5), 16); b = parseInt(c.slice(5, 7), 16); }
+      return "rgb(" + Math.round(r * f) + "," + Math.round(g * f) + "," + Math.round(b * f) + ")";
+    }
+    const m = c.match(/[\d.]+/g);
+    if (c.indexOf("rgb") === 0 && m) { const a = m[3] !== undefined ? m[3] : 1; return "rgba(" + Math.round(m[0] * f) + "," + Math.round(m[1] * f) + "," + Math.round(m[2] * f) + "," + a + ")"; }
+    return c;
+  }
+  const DK = (c) => FILTER_OK ? c : darken(c, 0.6);
 
   const FONT = "Galmuri11";           // 한글 픽셀 폰트
   // 폰트 로드 후 첫 렌더가 깨지지 않도록 미리 적재
@@ -193,11 +207,12 @@ html, body {
   const RANK_BTN = { x: VW - 150, y: 10, w: 140, h: 20 };  // 타이틀 우상단 '총 정산액' 버튼
   const SHOP_BTN = { x: VW - 150, y: 34, w: 140, h: 18 };  // 정산액 바로 아래 '상점' 버튼
   const SHOP_ITEMS = [
-    { key: "chew",  name: "개껌",  price: 200, desc: "강아지 부착속도 ↑ (누적)" },
+    { key: "chew",  name: "개껌",  price: 300, desc: "강아지 부착속도 ↑ (누적)" },
     { key: "churu", name: "츄르",  price: 100, desc: "고양이에게 줘서 전단지 보호" },
   ];
   let shopMsg = "";
-  const SHOP_BUY = [{ x: VW / 2 + 30, y: 110, w: 96, h: 26 }, { x: VW / 2 + 30, y: 168, w: 96, h: 26 }];
+  // 구매 버튼은 각 항목 행(py=88+i*58, 높이 50)의 세로 중앙(py+12)에 정렬
+  const SHOP_BUY = [{ x: VW / 2 + 30, y: 100, w: 96, h: 26 }, { x: VW / 2 + 30, y: 158, w: 96, h: 26 }];
   const BACK_BTN = { x: VW / 2 - 44, y: 244, w: 88, h: 22 };
   const ARROW_L = { x: VW / 2 - 110, y: 214, w: 22, h: 20 };  // 기록 페이지 이동
   const ARROW_R = { x: VW / 2 + 88, y: 214, w: 22, h: 20 };
@@ -717,11 +732,11 @@ html, body {
     };
     const L = buildLayout(idx, cfg);
     platforms = L.platforms; stairs = L.stairs; spots = L.spots; enforcers = L.enforcers; ninjas = L.ninjas; props = L.props; coins = L.coins;
-    // 고양이: 스테이지당 1마리(흰색). 유저 근처에서 스폰 후 자유롭게 돌아다님. 30초 전엔 안 찢음.
-    cats = [{
+    // 고양이: 스테이지2(idx>=1)부터 1마리(흰색). 유저 근처에서 스폰 후 자유롭게 돌아다님. 30초 전엔 안 찢음.
+    cats = idx >= 1 ? [{
       x: player.x + 50 + Math.random() * 50, lane: GROUND_Y, dir: Math.random() < 0.5 ? -1 : 1,
       anim: 0, target: null, actT: 1 + Math.random() * 3, done: false, moving: true,
-    }];
+    }] : [];
     // 강아지는 '유저의 강아지' 외엔 등장하지 않음.
     if (best.dog) {
       props = props.filter(q => q.kind !== "dog");      // 길 강아지 전부 제거 → 동료만
@@ -1648,7 +1663,7 @@ html, body {
 
   function drawStairs() {     // 사다리
     for (const s of stairs) {
-      const cx = s.x + s.w / 2, railGap = 14;         // 두 기둥 간격(너비 2배)
+      const cx = s.x + s.w / 2, railGap = 21;         // 두 기둥 간격(너비 1.5배)
       const lx = cx - railGap / 2, rx = cx + railGap / 2;
       // 기둥 2개
       ctx.fillStyle = "#8a7a52"; ctx.fillRect(lx - 1, s.top, 2, s.bottom - s.top); ctx.fillRect(rx - 1, s.top, 2, s.bottom - s.top);
@@ -1764,25 +1779,26 @@ html, body {
   }
 
   // 주차 차량 본체(트럭/버스) — 지오메트리 반환. tint로 색 다양.
-  function drawVehicleBody(cx, kind, tint) {
+  function drawVehicleBody(cx, kind, tint, dim) {
+    const F = (c) => dim ? DK(c) : c;   // 장식(props)으로 그릴 땐 어둡게, 스팟으로 그릴 땐 그대로
     const truck = kind === "truck";
     const w = truck ? 92 : 100, h = truck ? 26 : 28;
     const bx = cx - w / 2, by = GROUND_Y - h - 4;
-    ctx.fillStyle = "rgba(0,0,0,0.28)"; ctx.fillRect(bx - 2, GROUND_Y - 2, w + 4, 3);                 // 그림자
-    ctx.fillStyle = "#15151a"; ctx.fillRect(bx + 7, GROUND_Y - 5, 8, 5); ctx.fillRect(bx + w - 15, GROUND_Y - 5, 8, 5); // 바퀴
+    ctx.fillStyle = F("rgba(0,0,0,0.28)"); ctx.fillRect(bx - 2, GROUND_Y - 2, w + 4, 3);                 // 그림자
+    ctx.fillStyle = F("#15151a"); ctx.fillRect(bx + 7, GROUND_Y - 5, 8, 5); ctx.fillRect(bx + w - 15, GROUND_Y - 5, 8, 5); // 바퀴
     if (truck) {
       const body = ["#cdd0d6", "#c9a24a", "#9aa0aa"][((tint || 0) * 3) | 0];
-      ctx.fillStyle = "#5a8ac0"; ctx.fillRect(bx, by + 6, 15, h - 6);                                 // 캐빈
-      ctx.fillStyle = "rgba(190,220,245,0.6)"; ctx.fillRect(bx + 2, by + 8, 10, 7);                   // 캐빈 창
-      ctx.fillStyle = body; ctx.fillRect(bx + 15, by, w - 15, h);                                     // 화물칸
-      ctx.fillStyle = "rgba(255,255,255,0.12)"; ctx.fillRect(bx + 15, by, w - 15, 2);
-      ctx.fillStyle = "rgba(0,0,0,0.18)"; ctx.fillRect(bx + 15, by, 1, h);
+      ctx.fillStyle = F("#5a8ac0"); ctx.fillRect(bx, by + 6, 15, h - 6);                                 // 캐빈
+      ctx.fillStyle = F("rgba(190,220,245,0.6)"); ctx.fillRect(bx + 2, by + 8, 10, 7);                   // 캐빈 창
+      ctx.fillStyle = F(body); ctx.fillRect(bx + 15, by, w - 15, h);                                     // 화물칸
+      ctx.fillStyle = F("rgba(255,255,255,0.12)"); ctx.fillRect(bx + 15, by, w - 15, 2);
+      ctx.fillStyle = F("rgba(0,0,0,0.18)"); ctx.fillRect(bx + 15, by, 1, h);
     } else {
       const body = ["#e0a83a", "#d2683a", "#3a8ac0"][((tint || 0) * 3) | 0];
-      ctx.fillStyle = body; ctx.fillRect(bx, by, w, h);                                                // 버스 본체
-      ctx.fillStyle = "rgba(255,255,255,0.12)"; ctx.fillRect(bx, by, w, 2);
-      ctx.fillStyle = "rgba(190,220,245,0.6)"; for (let wx = bx + 6; wx < bx + w - 8; wx += 12) ctx.fillRect(wx, by + 4, 9, 7); // 창
-      ctx.fillStyle = "rgba(0,0,0,0.2)"; ctx.fillRect(bx, by + h - 6, w, 1);
+      ctx.fillStyle = F(body); ctx.fillRect(bx, by, w, h);                                                // 버스 본체
+      ctx.fillStyle = F("rgba(255,255,255,0.12)"); ctx.fillRect(bx, by, w, 2);
+      ctx.fillStyle = F("rgba(190,220,245,0.6)"); for (let wx = bx + 6; wx < bx + w - 8; wx += 12) ctx.fillRect(wx, by + 4, 9, 7); // 창
+      ctx.fillStyle = F("rgba(0,0,0,0.2)"); ctx.fillRect(bx, by + h - 6, w, 1);
     }
     return { bx, by, w, h, truck };
   }
@@ -1964,39 +1980,31 @@ html, body {
     for (const q of props) {
       if (q.kind === "dog") continue;               // 강아지는 별도 패스(스팟 앞)
       const x = q.x, y = q.y;
-      const dim = true;                             // 장식(차·트럭·버스·입간판)은 어둡게
-      if (FILTER_OK) ctx.filter = "brightness(0.6)";
+      if (FILTER_OK) ctx.filter = "brightness(0.6)";   // 지원 시 필터, 미지원 시 색을 DK로 어둡게
       if (q.kind === "car") {
         const cols = ["#b5494a", "#3a6ea5", "#caa94a", "#3f8a5a", "#6a6f7a", "#9a9aa6"];
         const col = cols[Math.floor(q.tint * cols.length) % cols.length];
-        ctx.fillStyle = "rgba(0,0,0,0.28)"; ctx.fillRect(x - 19, y - 2, 38, 3);     // 그림자
-        ctx.fillStyle = col; ctx.fillRect(x - 18, y - 12, 36, 10);                   // 차체
-        ctx.fillStyle = "rgba(0,0,0,0.18)"; ctx.fillRect(x - 18, y - 4, 36, 2);
-        ctx.fillStyle = col; ctx.fillRect(x - 12, y - 17, 24, 6);                     // 지붕
-        ctx.fillStyle = "rgba(255,255,255,0.18)"; ctx.fillRect(x - 12, y - 17, 24, 1);
-        ctx.fillStyle = "rgba(185,215,240,0.55)"; ctx.fillRect(x - 10, y - 16, 9, 5); ctx.fillRect(x + 1, y - 16, 9, 5); // 창
-        ctx.fillStyle = "#15151a"; ctx.fillRect(x - 13, y - 3, 7, 4); ctx.fillRect(x + 6, y - 3, 7, 4); // 바퀴
-        ctx.fillStyle = "#ffe6a0"; ctx.fillRect(x + 16, y - 10, 2, 2);                // 헤드라이트
-        ctx.fillStyle = "#d24a4a"; ctx.fillRect(x - 18, y - 10, 2, 2);                // 후미등
+        ctx.fillStyle = DK("rgba(0,0,0,0.28)"); ctx.fillRect(x - 19, y - 2, 38, 3);     // 그림자
+        ctx.fillStyle = DK(col); ctx.fillRect(x - 18, y - 12, 36, 10);                   // 차체
+        ctx.fillStyle = DK("rgba(0,0,0,0.18)"); ctx.fillRect(x - 18, y - 4, 36, 2);
+        ctx.fillStyle = DK(col); ctx.fillRect(x - 12, y - 17, 24, 6);                     // 지붕
+        ctx.fillStyle = DK("rgba(255,255,255,0.18)"); ctx.fillRect(x - 12, y - 17, 24, 1);
+        ctx.fillStyle = DK("rgba(185,215,240,0.55)"); ctx.fillRect(x - 10, y - 16, 9, 5); ctx.fillRect(x + 1, y - 16, 9, 5); // 창
+        ctx.fillStyle = DK("#15151a"); ctx.fillRect(x - 13, y - 3, 7, 4); ctx.fillRect(x + 6, y - 3, 7, 4); // 바퀴
+        ctx.fillStyle = DK("#ffe6a0"); ctx.fillRect(x + 16, y - 10, 2, 2);                // 헤드라이트
+        ctx.fillStyle = DK("#d24a4a"); ctx.fillRect(x - 18, y - 10, 2, 2);                // 후미등
       } else if (q.kind === "truck" || q.kind === "bus") {
-        drawVehicleBody(x, q.kind, q.tint);                                            // 주차 트럭/버스(장식)
+        drawVehicleBody(x, q.kind, q.tint, true);                                         // 주차 트럭/버스(장식, 어둡게)
       } else if (q.kind === "sign") {
-        ctx.fillStyle = "rgba(0,0,0,0.25)"; ctx.fillRect(x - 8, y - 2, 16, 2);        // 그림자
-        ctx.fillStyle = "#3a2f24"; ctx.fillRect(x - 7, y - 4, 2, 4); ctx.fillRect(x + 5, y - 4, 2, 4); // 다리
-        ctx.fillStyle = "#6a533a"; ctx.fillRect(x - 9, y - 24, 18, 21);               // 프레임
-        ctx.fillStyle = "#efe7d2"; ctx.fillRect(x - 7, y - 22, 14, 17);               // 보드 면
-        ctx.fillStyle = q.tint < 0.5 ? "#c83a3a" : "#2a5fb0"; ctx.fillRect(x - 5, y - 20, 10, 3); // 헤드라인
-        ctx.fillStyle = "rgba(40,40,40,0.5)";                                          // 글자 줄
+        ctx.fillStyle = DK("rgba(0,0,0,0.25)"); ctx.fillRect(x - 8, y - 2, 16, 2);        // 그림자
+        ctx.fillStyle = DK("#3a2f24"); ctx.fillRect(x - 7, y - 4, 2, 4); ctx.fillRect(x + 5, y - 4, 2, 4); // 다리
+        ctx.fillStyle = DK("#6a533a"); ctx.fillRect(x - 9, y - 24, 18, 21);               // 프레임
+        ctx.fillStyle = DK("#efe7d2"); ctx.fillRect(x - 7, y - 22, 14, 17);               // 보드 면
+        ctx.fillStyle = DK(q.tint < 0.5 ? "#c83a3a" : "#2a5fb0"); ctx.fillRect(x - 5, y - 20, 10, 3); // 헤드라인
+        ctx.fillStyle = DK("rgba(40,40,40,0.5)");                                          // 글자 줄
         for (let i = 0; i < 3; i++) ctx.fillRect(x - 5, y - 15 + i * 4, 9, 1);
       }
       if (FILTER_OK) ctx.filter = "none";
-      else {   // filter 미지원 폴백: 장식 영역에 검정 오버레이
-        let bx2, by2, bw2, bh2;
-        if (q.kind === "car") { bx2 = x - 19; by2 = y - 18; bw2 = 38; bh2 = 18; }
-        else if (q.kind === "truck" || q.kind === "bus") { const w = q.kind === "truck" ? 92 : 100, h = q.kind === "truck" ? 26 : 28, b = x - w / 2, t = GROUND_Y - h - 4; bx2 = b - 2; by2 = t; bw2 = w + 4; bh2 = GROUND_Y - t + 2; }
-        else { bx2 = x - 9; by2 = y - 24; bw2 = 18; bh2 = 24; }   // sign
-        ctx.fillStyle = DIM6; ctx.fillRect(bx2, by2, bw2, bh2);
-      }
     }
   }
 
@@ -2153,29 +2161,30 @@ html, body {
         ctx.fillRect(c.x - r, c.lane - 16, r * 2, 10);
       }
       const dim = !c.isComplainer;                       // 민원인(상호작용) 외 행인은 어둡게
+      const D = (cc) => (dim && !FILTER_OK) ? darken(cc, 0.6) : cc;   // filter 미지원 시 색으로 어둡게
       if (dim && FILTER_OK) ctx.filter = "brightness(0.6)";
       // 자전거(타는 사람)는 몸 아래에 자전거 먼저
       if (c.ctype === "cyclist") drawBike(x, c.lane, c.dir);
       const by = c.ctype === "cyclist" ? y - 7 : y;        // 자전거는 안장 위에 앉음
       const lean = c.ctype === "runner" ? c.dir * 2 : 0;   // 뛰는 사람은 앞으로 기움
       // 백팩 (등쪽)
-      if (c.ctype === "backpack") { ctx.fillStyle = c.accent; ctx.fillRect(x + (c.dir === 1 ? -8 : 5), by - c.h + 1, 4, c.h - 6); }
+      if (c.ctype === "backpack") { ctx.fillStyle = D(c.accent); ctx.fillRect(x + (c.dir === 1 ? -8 : 5), by - c.h + 1, 4, c.h - 6); }
       // 몸통
-      ctx.fillStyle = c.color; ctx.fillRect(x - 5 + lean, by - c.h, 10, c.h - 5);
+      ctx.fillStyle = D(c.color); ctx.fillRect(x - 5 + lean, by - c.h, 10, c.h - 5);
       // 정장 넥타이
-      if (c.tie) { ctx.fillStyle = c.tie; ctx.fillRect(x - 1 + lean, by - c.h + 1, 2, Math.max(3, c.h - 9)); }
+      if (c.tie) { ctx.fillStyle = D(c.tie); ctx.fillRect(x - 1 + lean, by - c.h + 1, 2, Math.max(3, c.h - 9)); }
       // 머리 + 머리카락(타입별 색)
-      ctx.fillStyle = "#e7c39a"; ctx.fillRect(x - 3 + lean, by - c.h - 5, 6, 6);
-      ctx.fillStyle = c.hair; ctx.fillRect(x - 3 + lean, by - c.h - 6, 6, 2);
+      ctx.fillStyle = D("#e7c39a"); ctx.fillRect(x - 3 + lean, by - c.h - 5, 6, 6);
+      ctx.fillStyle = D(c.hair); ctx.fillRect(x - 3 + lean, by - c.h - 6, 6, 2);
       if (c.ctype === "punk") { ctx.fillRect(x - 1 + lean, by - c.h - 9, 2, 3); }   // 솟은 머리(모히칸)
       // 노인 지팡이
-      if (c.ctype === "elder") { ctx.strokeStyle = "#7a5a32"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x + 6, by - c.h + 3); ctx.lineTo(x + 8, by - 1); ctx.stroke(); }
+      if (c.ctype === "elder") { ctx.strokeStyle = D("#7a5a32"); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x + 6, by - c.h + 3); ctx.lineTo(x + 8, by - 1); ctx.stroke(); }
       // 다리
       if (c.ctype === "cyclist") {                          // 페달 밟는 다리
-        ctx.fillStyle = "#2b2b3a"; ctx.fillRect(x - 2, by - 4, 3, 4); ctx.fillRect(x + 1, by - 5, 3, 4);
+        ctx.fillStyle = D("#2b2b3a"); ctx.fillRect(x - 2, by - 4, 3, 4); ctx.fillRect(x + 1, by - 5, 3, 4);
       } else {
         const amp = c.ctype === "runner" ? 2.2 : 1;
-        ctx.fillStyle = "#2b2b3a";
+        ctx.fillStyle = D("#2b2b3a");
         ctx.fillRect(x - 4 + stride * amp + lean, y - 5, 3, 5);
         ctx.fillRect(x + 1 - stride * amp + lean, y - 5, 3, 5);
       }
@@ -2199,7 +2208,7 @@ html, body {
         // 화남 표시(핏대)
         if (angry) { ctx.fillStyle = "#ff4444"; ctx.fillRect(x + 4, y - c.h - 6, 3, 1); ctx.fillRect(x + 5, y - c.h - 8, 1, 3); }
       }
-      if (dim) { if (FILTER_OK) ctx.filter = "none"; else { ctx.fillStyle = DIM6; ctx.fillRect(c.x - 9, c.lane - c.h - 11, 18, c.h + 13); } }   // filter 미지원 폴백
+      if (dim && FILTER_OK) ctx.filter = "none";
       // 신고 말풍선 (2배 크기)
       if (angry) drawSpeech(x, y - c.h - 12, "여기 전단지 붙이지 마세요!", 2, "#c81e1e");
     }
@@ -2450,9 +2459,11 @@ html, body {
       ctx.fillRect(0, 0, VW, VH);
     }
 
-    // 조작 힌트
-    ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.font = "7px Galmuri11, monospace"; ctx.textAlign = "center";
-    ctx.fillText("← → 이동  ↑↓ 사다리  J 부착(연속)  ·  우측 공중전화로 완료", VW / 2, VH - 6);
+    // 조작 힌트 (모바일은 가상 패드가 있으므로 표기 안 함)
+    if (!mobile()) {
+      ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.font = "7px Galmuri11, monospace"; ctx.textAlign = "center";
+      ctx.fillText("← → 이동  ↑↓ 사다리  J 부착(연속)  ·  우측 공중전화로 완료", VW / 2, VH - 6);
+    }
   }
 
   // --- 타이틀 화면 (로고 / 현재 스테이지 / PLAY) ---------------------------
@@ -2815,9 +2826,10 @@ html, body {
 
   // 튜토리얼 안내용 키 표시(머리 위 [J] 등) — 통통 튀어 시선 유도
   function tutKey(x, y, label) {
+    const yy = y + Math.sin(performance.now() / 240) * 1.6;
+    if (mobile() && label === "J") { drawGreenKey(x, yy - 6, 5); return; }   // 모바일: J → 초록 버튼 아이콘
     ctx.font = "bold 9px Galmuri11, monospace"; ctx.textAlign = "center";
     const w = Math.max(15, Math.ceil(ctx.measureText(label).width) + 8), h = 13;
-    const yy = y + Math.sin(performance.now() / 240) * 1.6;
     ctx.fillStyle = "#15151c"; ctx.fillRect(x - w / 2, yy - h, w, h);
     ctx.strokeStyle = "#ffd24d"; ctx.lineWidth = 1; ctx.strokeRect(x - w / 2 + 0.5, yy - h + 0.5, w - 1, h - 1);
     ctx.fillStyle = "#222"; ctx.fillRect(x - 1, yy, 2, 2);                          // 말풍선 꼬리
