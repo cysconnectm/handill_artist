@@ -239,6 +239,7 @@ html, body {
     { title: "단속반을 피하세요", desc: "적발되면 점수가 차감되고\n행동에 이상이 생깁니다.", anim: "bust" },
     { title: "공중전화로 마무리", desc: "다 붙이고 시간이 남으면\n공중전화로 연락 → 시간 보너스!", anim: "phone" },
     { title: "강아지와 함께", desc: "강아지를 쓰다듬으세요.\n강아지가 부착을 도와줍니다.", anim: "dog" },
+    { title: "고양이를 조심하세요", desc: "고양이가 붙인 전단지를 찢어요.\n츄르를 주면 막을 수 있어요.", anim: "cat" },
   ];
   let settleBtns = [];                   // 정산 화면 버튼 히트박스
   let shake = 0;                         // 화면 흔들림(타격감)
@@ -2638,9 +2639,9 @@ html, body {
       const it = SHOP_ITEMS[i], py = 88 + i * 58, owned = best[it.key] || 0;
       ctx.fillStyle = "rgba(10,14,24,0.7)"; ctx.fillRect(cx - 150, py, 300, 50);
       ctx.strokeStyle = "#5a6a8a"; ctx.lineWidth = 1; ctx.strokeRect(cx - 150 + 0.5, py + 0.5, 300, 50);
-      drawShopIcon(it.key, cx - 132, py + 25);   // 이름 앞 아이콘(행 세로 중앙, 2배)
+      drawShopIcon(it.key, cx - 124, py + 25);   // 이름 앞 아이콘(좌측 여백↑·우측 여백↓)
       ctx.textAlign = "left"; ctx.fillStyle = "#fff"; ctx.font = "13px Galmuri11, monospace";
-      ctx.fillText(it.name + "  (보유 " + owned + ")", cx - 104, py + 20);
+      ctx.fillText(it.name + "  (보유 " + owned + ")", cx - 104, py + 24);   // 라벨 4px 아래로
       ctx.fillStyle = "#bcd0e8"; ctx.font = "8px Galmuri11, monospace";
       let desc = it.desc;
       if (it.key === "chew") {                                 // 현재 부착속도 배수 표기
@@ -2896,7 +2897,7 @@ html, body {
       drawSpeech(acx - 22, acy - 18, "전데여~");                                  // 말풍선은 캐릭터 왼쪽 위
       ctx.fillStyle = "#7fffd4"; ctx.font = "bold 9px Galmuri11, monospace"; ctx.textAlign = "center"; ctx.fillText("+시간!", acx + 48, acy - 16 - (c % 1) * 8); // 부스 오른쪽
       tutKey(acx + 23, acy - 38, "J");                                            // 전화부스 위 [J]
-    } else {  // dog
+    } else if (page.anim === "dog") {
       const c = tt % 2.0;
       const dogX = acx + 22 - Math.min(24, tt * 12 % 36);
       tutPerson(acx - 18, acy + 4, "#c8443c", false);
@@ -2904,6 +2905,22 @@ html, body {
       ctx.fillStyle = "#d23a3a"; ctx.fillRect(dogX - 6, acy - 3, 5, 2);                          // 빨간 목걸이
       if (c > 0.6) { ctx.globalAlpha = Math.min(1, (c - 0.6) / 0.5); ctx.fillStyle = "#ff6b8a"; const hy = acy - 20 - (c - 0.6) * 6; ctx.fillRect(acx - 16, hy, 2, 2); ctx.fillRect(acx - 13, hy, 2, 2); ctx.fillRect(acx - 15, hy + 2, 4, 2); ctx.fillRect(acx - 14, hy + 4, 2, 2); ctx.globalAlpha = 1; }
       tutKey(dogX, acy - 14, "J");                                                // 강아지 머리 위 쓰다듬기 키
+    } else {  // cat — 고양이가 전단지를 찢음, 츄르로 막기
+      const c = tt % 2.0, torn = c > 1.1;
+      // 벽 + 붙은 전단지(찢기 전/후)
+      ctx.fillStyle = "#54546a"; ctx.fillRect(acx + 12, acy - 30, 30, 34);
+      ctx.fillStyle = "rgba(0,0,0,0.1)"; ctx.fillRect(acx + 12, acy - 13, 30, 1);
+      if (!torn) { ctx.fillStyle = "#f4f4f2"; ctx.fillRect(acx + 20, acy - 24, 10, 16); ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.fillRect(acx + 20, acy - 24, 10, 3); }
+      else { ctx.fillStyle = "#c8c4ba"; ctx.fillRect(acx + 20, acy - 24, 4, 16); ctx.fillRect(acx + 26, acy - 24, 4, 16); }   // 찢긴 조각
+      // 흰 고양이(뒷모습) — 앞발 들어 긁는 모션
+      const X = acx, Y = acy + 4, shred = Math.sin(tt * 22) * 2;
+      ctx.fillStyle = "#c4c0b6"; ctx.fillRect(X - 1, Y - 22, 2, 16);              // 꼿꼿한 꼬리
+      ctx.fillStyle = "#f4f2ec";
+      ctx.fillRect(X - 6, Y - 11, 12, 10);                                       // 몸통
+      ctx.fillRect(X - 4, Y - 16, 8, 6);                                         // 머리(뒤통수)
+      ctx.fillRect(X - 4, Y - 19, 3, 3); ctx.fillRect(X + 1, Y - 19, 3, 3);      // 귀
+      ctx.fillRect(X + 5, Y - 5 - shred, 2, 4);                                  // 앞발(긁기)
+      tutKey(X, Y - 22, "J");                                                    // 츄르 주기 키(모바일=초록 아이콘)
     }
     ctx.restore();
 
