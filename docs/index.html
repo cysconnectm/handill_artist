@@ -2641,14 +2641,17 @@ html, body {
       ctx.strokeStyle = "#5a6a8a"; ctx.lineWidth = 1; ctx.strokeRect(cx - 150 + 0.5, py + 0.5, 300, 50);
       drawShopIcon(it.key, cx - 124, py + 25);   // 이름 앞 아이콘(좌측 여백↑·우측 여백↓)
       ctx.textAlign = "left"; ctx.fillStyle = "#fff"; ctx.font = "13px Galmuri11, monospace";
-      ctx.fillText(it.name + "  (보유 " + owned + ")", cx - 104, py + 24);   // 라벨 4px 아래로
+      // 개껌은 보유 갯수 미표시(즉시효과형), 츄르는 보유 표시(인벤형)
+      ctx.fillText(it.key === "chew" ? it.name : (it.name + "  (보유 " + owned + ")"), cx - 104, py + 24);
       ctx.fillStyle = "#bcd0e8"; ctx.font = "8px Galmuri11, monospace";
-      let desc = it.desc;
-      if (it.key === "chew") {                                 // 현재 부착속도 배수 표기
-        const m = Math.max(1, 4 - owned * 0.6);                 // updateCompanion과 동일
-        desc = "부착속도 x" + (4 / m).toFixed(1) + " (구매 시 ↑)";
+      if (it.key === "chew") {
+        const m0 = Math.max(1, 4 - owned * 0.6), s0 = (4 / m0).toFixed(1);          // 현재 부착속도(배수)
+        const m1 = Math.max(1, 4 - (owned + 1) * 0.6), s1 = (4 / m1).toFixed(1);    // 구매 시
+        ctx.fillText("강아지가 더 빨리 부착합니다", cx - 104, py + 35);
+        ctx.fillText(s0 === s1 ? "부착속도 x" + s0 + " (최대)" : "부착속도 x" + s0 + " > x" + s1, cx - 104, py + 46);
+      } else {
+        ctx.fillText(it.desc, cx - 104, py + 38);
       }
-      ctx.fillText(desc, cx - 104, py + 38);
       const bb = SHOP_BUY[i], can = best.coins >= it.price;
       ctx.fillStyle = can ? "#1a7a3a" : "#444"; ctx.fillRect(bb.x, bb.y, bb.w, bb.h);
       ctx.strokeStyle = can ? "#33b15a" : "#666"; ctx.lineWidth = 1; ctx.strokeRect(bb.x + 0.5, bb.y + 0.5, bb.w - 1, bb.h - 1);
