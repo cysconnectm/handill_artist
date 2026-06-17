@@ -280,11 +280,17 @@ html, body {
     } catch (e) { return "offline"; }
   }
   // 내 점수 업로드(이름 기준 upsert) — 총정산액 + 스테이지별 최고 수익(s0~s9)
+  // s0~s9 컬럼이 없으면 업서트가 400으로 거부되므로, 실패 시 '핵심 컬럼만' 재시도해 점수는 반드시 저장.
   async function pushScore() {
     if (!netOn() || !best.name) return;
-    const body = { name: best.name, life: best.life, t: best.t, rank: best.r, stage: best.stage };
-    for (let i = 0; i < STAGES.length; i++) body["s" + i] = best.stageEarn[i] || 0;
-    try { await fetch(SUPA.url + "/rest/v1/scores?on_conflict=name", { method: "POST", headers: supaHead({ Prefer: "resolution=merge-duplicates,return=minimal" }), body: JSON.stringify(body) }); } catch (e) {}
+    const core = { name: best.name, life: best.life, t: best.t, rank: best.r, stage: best.stage };
+    const full = Object.assign({}, core);
+    for (let i = 0; i < STAGES.length; i++) full["s" + i] = best.stageEarn[i] || 0;
+    const post = (b) => fetch(SUPA.url + "/rest/v1/scores?on_conflict=name", { method: "POST", headers: supaHead({ Prefer: "resolution=merge-duplicates,return=minimal" }), body: JSON.stringify(b) });
+    try {
+      const r = await post(full);
+      if (!r.ok) await post(core);            // s0~s9 컬럼 미존재 등 → 핵심만 저장(총점 랭킹은 항상 기록)
+    } catch (e) { try { await post(core); } catch (e2) {} }
   }
   // 랭킹 조회. page 0=총 정산액(life), 1..N=스테이지별(s{page-1}). 페이지별 캐시.
   const boardCache = {};
