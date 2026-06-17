@@ -190,38 +190,46 @@ html, body {
     { name: "청와대", time: "night", sky: ["#0a1020", "#13233a"], theme: "bluehouse", far: "#16243a", win: "rgba(180,210,255,0.20)",
       pal: { gnd: "#20283a", gtop: "#3a4a6a", tile: "#7a2a2a", wall: "#243a52", ledge: "#3a6ea5", win2: "rgba(255,235,180,0.30)", lamp: "lanternB", glow: "150,200,255" } },
 
-    // === 2챕터: 지하철 (객차 안으로 진입 → 다음 역까지) — theme:"subway", line=호선 색 ===
-    { name: "1호선 승차", time: "subway", sky: ["#0b0d15", "#191c28"], theme: "subway", line: "#0052A4", far: "#161925", win: "rgba(150,180,220,0.10)",
-      pal: { gnd: "#3a3d46", gtop: "#52555f", tile: "#2e3038", wall: "#2a2d36", ledge: "#0052A4", win2: "rgba(150,180,220,0.12)", lamp: "subwaylight", glow: "230,240,255" } },
-    { name: "2호선 순환", time: "subway", sky: ["#0a0f0c", "#161f1a"], theme: "subway", line: "#00A84D", far: "#15201a", win: "rgba(160,210,180,0.10)",
+    // === 2챕터: 지하철 (출발역 → 객차 → 도착역) — sub: 구간 타입 / 출발=낮, 도착=밤 ===
+    { name: "출발역 길거리", time: "day", sky: ["#4f93d6", "#cfe7f6"], theme: "shops", sub: "street", line: "#00A84D", far: "#7088a8", win: "rgba(185,208,228,0.35)",
+      pal: { gnd: "#4a4754", gtop: "#6a6678", tile: "#56536a", wall: "#6a5a78", ledge: "#8a7aa0", win2: "rgba(195,212,235,0.4)", lamp: "street", glow: "255,224,150" } },
+    { name: "지하철 상가", time: "day", sky: ["#2b323e", "#3f4858"], theme: "subway", sub: "arcade", line: "#00A84D", far: "#2b323e", win: "rgba(200,210,225,0.14)",
+      pal: { gnd: "#41444d", gtop: "#5a5e69", tile: "#34373f", wall: "#2f323b", ledge: "#00A84D", win2: "rgba(200,220,210,0.16)", lamp: "subwaylight", glow: "235,245,240" } },
+    { name: "승강장", time: "day", sky: ["#2a313c", "#3c4555"], theme: "subway", sub: "platform", line: "#00A84D", far: "#2a313c", win: "rgba(195,210,225,0.14)",
+      pal: { gnd: "#3c3f48", gtop: "#54585f", tile: "#30333b", wall: "#2b2e37", ledge: "#00A84D", win2: "rgba(190,215,200,0.14)", lamp: "subwaylight", glow: "232,245,238" } },
+    { name: "객차", time: "car", sky: ["#0c0e16", "#191c28"], theme: "subway", sub: "car", line: "#00A84D", far: "#161925", win: "rgba(160,210,180,0.10)",
       pal: { gnd: "#3a3f3c", gtop: "#525a55", tile: "#2e322f", wall: "#2a302c", ledge: "#00A84D", win2: "rgba(160,210,180,0.12)", lamp: "subwaylight", glow: "230,245,235" } },
-    { name: "3호선 환승", time: "subway", sky: ["#140e09", "#241a12"], theme: "subway", line: "#EF7C1C", far: "#251a12", win: "rgba(240,180,120,0.10)",
-      pal: { gnd: "#433d36", gtop: "#5e544a", tile: "#332e28", wall: "#302a24", ledge: "#EF7C1C", win2: "rgba(240,190,130,0.12)", lamp: "subwaylight", glow: "255,230,200" } },
-    { name: "4호선 급행", time: "subway", sky: ["#08111a", "#13202b"], theme: "subway", line: "#00A5DE", far: "#13202b", win: "rgba(150,200,230,0.10)",
-      pal: { gnd: "#3a4046", gtop: "#525a60", tile: "#2e3338", wall: "#2a3036", ledge: "#00A5DE", win2: "rgba(150,205,235,0.12)", lamp: "subwaylight", glow: "225,240,250" } },
-    { name: "5호선 만원", time: "subway", sky: ["#100c16", "#1d1726"], theme: "subway", line: "#996CAC", far: "#1c1726", win: "rgba(190,170,210,0.10)",
-      pal: { gnd: "#3e3a44", gtop: "#58525e", tile: "#312e36", wall: "#2d2a32", ledge: "#996CAC", win2: "rgba(195,175,215,0.12)", lamp: "subwaylight", glow: "235,228,245" } },
-    { name: "6호선 막차", time: "subway", sky: ["#120e08", "#211a10"], theme: "subway", line: "#CD7C2F", far: "#201a12", win: "rgba(220,180,120,0.08)",
-      pal: { gnd: "#423d35", gtop: "#5c5349", tile: "#322d27", wall: "#2e2a23", ledge: "#CD7C2F", win2: "rgba(225,185,130,0.10)", lamp: "subwaylight", glow: "245,225,195" } },
-    { name: "7호선 심야", time: "subway", sky: ["#0d0f08", "#181d10"], theme: "subway", line: "#747F00", far: "#181d10", win: "rgba(190,200,120,0.08)",
-      pal: { gnd: "#3d3f36", gtop: "#56594b", tile: "#2f3128", wall: "#2b2d24", ledge: "#747F00", win2: "rgba(195,205,130,0.10)", lamp: "subwaylight", glow: "235,240,205" } },
-    { name: "8호선 종점행", time: "subway", sky: ["#140810", "#23121d"], theme: "subway", line: "#E6186C", far: "#22121d", win: "rgba(235,140,185,0.08)",
-      pal: { gnd: "#433a3f", gtop: "#5e5057", tile: "#332a30", wall: "#2f2a2d", ledge: "#E6186C", win2: "rgba(240,150,190,0.10)", lamp: "subwaylight", glow: "250,215,230" } },
-    { name: "공항철도 직통", time: "subway", sky: ["#080f18", "#121e2c"], theme: "subway", line: "#0090D2", far: "#121e2c", win: "rgba(140,195,230,0.12)",
-      pal: { gnd: "#3a4046", gtop: "#525c64", tile: "#2e343a", wall: "#2a3138", ledge: "#0090D2", win2: "rgba(150,205,240,0.14)", lamp: "subwaylight", glow: "220,240,252" } },
-    { name: "자기부상 시운전", time: "subway", sky: ["#0c0e14", "#1b2030"], theme: "subway", line: "#7da0c8", far: "#1a2030", win: "rgba(190,210,240,0.14)",
-      pal: { gnd: "#3c4250", gtop: "#56607a", tile: "#30343f", wall: "#2c3340", ledge: "#7da0c8", win2: "rgba(195,215,245,0.16)", lamp: "subwaylight", glow: "230,242,255" } },
+    { name: "만원 객차", time: "car", sky: ["#0c0e16", "#191c28"], theme: "subway", sub: "carCrowd", line: "#00A84D", far: "#161925", win: "rgba(160,210,180,0.10)",
+      pal: { gnd: "#3a3f3c", gtop: "#525a55", tile: "#2e322f", wall: "#2a302c", ledge: "#00A84D", win2: "rgba(160,210,180,0.12)", lamp: "subwaylight", glow: "230,245,235" } },
+    { name: "추운 객차", time: "car", sky: ["#0a1018", "#142230"], theme: "subway", sub: "carCold", line: "#7fd8ff", far: "#142230", win: "rgba(170,215,240,0.12)",
+      pal: { gnd: "#3a4248", gtop: "#525e66", tile: "#2e363c", wall: "#2a3238", ledge: "#7fd8ff", win2: "rgba(180,220,245,0.14)", lamp: "subwaylight", glow: "215,238,252" } },
+    { name: "객차", time: "car", sky: ["#0c0e16", "#191c28"], theme: "subway", sub: "car", line: "#00A84D", far: "#161925", win: "rgba(160,210,180,0.10)",
+      pal: { gnd: "#3a3f3c", gtop: "#525a55", tile: "#2e322f", wall: "#2a302c", ledge: "#00A84D", win2: "rgba(160,210,180,0.12)", lamp: "subwaylight", glow: "230,245,235" } },
+    { name: "도착 승강장", time: "night", sky: ["#090c14", "#141826"], theme: "subway", sub: "platform", line: "#00A84D", far: "#141826", win: "rgba(170,190,215,0.10)",
+      pal: { gnd: "#2e313a", gtop: "#444852", tile: "#262930", wall: "#23262f", ledge: "#00A84D", win2: "rgba(170,200,185,0.12)", lamp: "subwaylight", glow: "225,240,235" } },
+    { name: "도착 상가", time: "night", sky: ["#0a0d16", "#161a28"], theme: "subway", sub: "arcade", line: "#00A84D", far: "#161a28", win: "rgba(180,195,215,0.10)",
+      pal: { gnd: "#30333c", gtop: "#474b55", tile: "#282b33", wall: "#252832", ledge: "#00A84D", win2: "rgba(180,205,195,0.12)", lamp: "subwaylight", glow: "228,242,236" } },
+    { name: "도착역 길거리", time: "night", sky: ["#11162a", "#2a2440"], theme: "shops", sub: "street", line: "#00A84D", far: "#1e2640", win: "rgba(200,220,255,0.28)",
+      pal: { gnd: "#22242e", gtop: "#3a3e52", tile: "#3a3850", wall: "#2e1530", ledge: "#5a4a6a", win2: "rgba(200,220,255,0.30)", lamp: "street", glow: "255,210,150" } },
   ];
   // 챕터: 0=차가운 도시(0~9), 1=지하철(10~19). 차가운 도시 클리어 후 지하철 이어서 해금.
   const CHAPTERS = [{ name: "차가운 도시", start: 0 }, { name: "지하철", start: 10 }];
   const chapterOf = (idx) => idx >= 10 ? 1 : 0;
+  // 지하철 구간 타입 헬퍼
+  const subOf = (idx) => STAGES[idx].sub || "";
+  const isCar = (idx) => { const s = subOf(idx); return s === "car" || s === "carCrowd" || s === "carCold"; };
+  const isIndoor = (idx) => isCar(idx) || subOf(idx) === "arcade" || subOf(idx) === "platform";   // 단층(상하 이동 없음)
+  // 스테이지별 적/민원인 유무 (5번=만원칸: 둘 다 없음, 6번=추운칸: 단속반만)
+  function stageFlags(idx) {
+    const s = subOf(idx);
+    return { noEnf: s === "carCrowd", noComp: s === "carCrowd" || s === "carCold", cold: s === "carCold", crowd: s === "carCrowd" };
+  }
   function stageCfg(idx) {
-    const ci = idx % 10;                                 // 챕터 내 인덱스로 난이도 곡선(챕터마다 리셋)
-    const sub = idx >= 10;                               // 지하철은 살짝 더 빡세게
+    const ci = idx % 10;                                 // 레벨링 동일: 챕터 내 인덱스 곡선
     return {
-      enfSpeedMul: 1 + ci * 0.10 + (sub ? 0.15 : 0),
-      complainers: Math.min(2 + Math.floor(ci * 0.8) + (sub ? 1 : 0), 9),
-      spotMul: 1 + ci * 0.15 + (sub ? 0.3 : 0),
+      enfSpeedMul: 1 + ci * 0.10,
+      complainers: Math.min(2 + Math.floor(ci * 0.8), 9),
+      spotMul: 1 + ci * 0.15,
     };
   }
 
@@ -628,30 +636,32 @@ html, body {
     const HW = { board: 40, wall: 64, pole: 9, truck: 47, bus: 51 };  // 스팟별 점유 반폭(전단지 가로 1.5배 반영)
     const mk = (x, y, base, kind) => { kind = kind || "board"; spots.push({ x, y, base: Math.round(base * cfg.spotMul), slots: SLOTS[kind], kind, filled: 0, p: 0, _busy: false, dogSet: new Set(), tornSet: new Set() }); occupy(x, HW[kind]); return spots[spots.length - 1]; };
 
-    // 1) 2층 발코니 2~3개 + 계단(계단 지상 x 점유)
-    const nUp = ri(2, 3), zoneW = 1440 / nUp, upper = [];
-    for (let i = 0; i < nUp; i++) {
-      const z0 = 120 + i * zoneW;
-      const w = ri(200, Math.min(300, zoneW - 60));
-      const x = Math.round(z0 + ri(20, Math.max(20, zoneW - w - 40)));
-      platforms.push({ x, y: UPPER_Y, w }); upper.push({ x, w });
-      const sx = Math.round(x + 16);
-      stairs.push({ x: sx, w: 24, top: UPPER_Y, bottom: GROUND_Y });   // 1→2층
-      occupy(sx + 12, 18);
+    const flat = isIndoor(idx);              // 지하철 실내(상가·승강장·객차) = 단층(상하 이동 없음)
+    // 1~2) 2·3층 발코니 + 계단 — 실내는 생성 안 함
+    let upper = [], top = [];
+    if (!flat) {
+      const nUp = ri(2, 3), zoneW = 1440 / nUp;
+      for (let i = 0; i < nUp; i++) {
+        const z0 = 120 + i * zoneW;
+        const w = ri(200, Math.min(300, zoneW - 60));
+        const x = Math.round(z0 + ri(20, Math.max(20, zoneW - w - 40)));
+        platforms.push({ x, y: UPPER_Y, w }); upper.push({ x, w });
+        const sx = Math.round(x + 16);
+        stairs.push({ x: sx, w: 24, top: UPPER_Y, bottom: GROUND_Y });   // 1→2층
+        occupy(sx + 12, 18);
+      }
+      const nTop = idx >= 2 ? ri(1, 2) : (R() < 0.5 ? 1 : 0);
+      for (const b of [...upper].sort(() => R() - 0.5).slice(0, Math.min(nTop, upper.length))) {
+        const w = Math.min(b.w - 30, ri(170, 210)); if (w < 120) continue;
+        const x = Math.round(b.x + ri(8, Math.max(8, b.w - w - 8)));
+        platforms.push({ x, y: TOP_Y, w }); top.push({ x, w });
+        const sx = Math.round(x + w - 28);
+        stairs.push({ x: sx, w: 24, top: TOP_Y, bottom: UPPER_Y });      // 2→3층
+        occupy(sx + 12, 18);
+      }
     }
-    // 2) 일부 2층 위에 3층 발코니 + 계단
-    const nTop = idx >= 2 ? ri(1, 2) : (R() < 0.5 ? 1 : 0);
-    const top = [];
-    for (const b of [...upper].sort(() => R() - 0.5).slice(0, Math.min(nTop, upper.length))) {
-      const w = Math.min(b.w - 30, ri(170, 210)); if (w < 120) continue;
-      const x = Math.round(b.x + ri(8, Math.max(8, b.w - w - 8)));
-      platforms.push({ x, y: TOP_Y, w }); top.push({ x, w });
-      const sx = Math.round(x + w - 28);
-      stairs.push({ x: sx, w: 24, top: TOP_Y, bottom: UPPER_Y });      // 2→3층
-      occupy(sx + 12, 18);
-    }
-    // 3) 지상 스팟: 건물벽(wall) ↔ 전봇대(pole) 번갈아 — 계단·구조물과 안 겹치게
-    const nG = ri(2, 3), gseg = (1450 - 150) / nG;
+    // 3) 지상 스팟: 건물벽(wall) ↔ 전봇대(pole) 번갈아 — 실내는 더 촘촘히
+    const nG = flat ? ri(4, 6) : ri(2, 3), gseg = (1450 - 150) / nG;
     for (let i = 0; i < nG; i++) {
       const kind = i % 2 === 0 ? "wall" : "pole";
       const s0 = Math.round(150 + i * gseg + 20), s1 = Math.round(150 + (i + 1) * gseg - 40);
@@ -661,15 +671,17 @@ html, body {
     // 발코니 스팟(게시판) — 계단 위치를 피해 배치
     for (const b of upper) { let x = Math.round(b.x + b.w / 2); if (!free(x, HW.board, 4)) x = findFree(b.x + 24, b.x + b.w - 24, HW.board, 2) || x; mk(x, UPPER_Y, ri(18, 25)); }
     for (const b of top) { let x = Math.round(b.x + b.w / 2); if (!free(x, HW.board, 4)) x = findFree(b.x + 20, b.x + b.w - 20, HW.board, 2) || x; mk(x, TOP_Y, ri(28, 36)); }
-    // 3b) 주차 대형차량(트럭/버스) — 랜덤하게 전단지 스팟으로도 기능
-    for (let i = 0, nVeh = ri(1, 2); i < nVeh; i++) {
-      const isBus = R() < 0.5, kind = isBus ? "bus" : "truck";
-      const x = findFree(240, 1360, HW[kind], 10);
-      if (x == null) continue;
-      if (R() < 0.55) { const sp = mk(x, GROUND_Y, ri(11, 16), kind); sp.tintv = R(); }         // 전단지 스팟
-      else { props.push({ kind, x, y: GROUND_Y, tint: R() }); occupy(x, HW[kind]); }            // 장식
+    // 3b) 주차 대형차량(트럭/버스) — 실내(지하철)엔 없음
+    if (!flat) {
+      for (let i = 0, nVeh = ri(1, 2); i < nVeh; i++) {
+        const isBus = R() < 0.5, kind = isBus ? "bus" : "truck";
+        const x = findFree(240, 1360, HW[kind], 10);
+        if (x == null) continue;
+        if (R() < 0.55) { const sp = mk(x, GROUND_Y, ri(11, 16), kind); sp.tintv = R(); }         // 전단지 스팟
+        else { props.push({ kind, x, y: GROUND_Y, tint: R() }); occupy(x, HW[kind]); }            // 장식
+      }
     }
-    // 4) 단속반: 후반으로 갈수록 수·속도·종류 강화(레벨링).
+    // 4) 단속반: 후반으로 갈수록 수·속도·종류 강화(레벨링). 실내는 지상 순찰만.
     const SP = 1.0;
     E(GROUND_Y, ri(300, 900), 120, 1180, SP, R() < 0.5 ? 1 : -1);
     if (idx >= 1 || R() < 0.6) E(GROUND_Y, ri(700, 1200), 560, 1500, SP, -1);   // 2번째 지상 순찰(1스테이지만 확률)
@@ -677,8 +689,8 @@ html, body {
     if (idx >= 6) E(GROUND_Y, ri(400, 1200), 200, WORLD_W - 100, SP, -1);       // 4번째 순찰
     for (const b of upper) E(UPPER_Y, b.x + b.w / 2, b.x + 10, b.x + b.w - 10, SP, R() < 0.5 ? 1 : -1);
     for (const b of top) { E(TOP_Y, b.x + b.w / 2, b.x + 10, b.x + b.w - 10, SP, 1); if (R() < 0.5 || idx >= 5) E(TOP_Y, b.x + b.w / 2, b.x + 10, b.x + b.w - 10, SP, -1); }
-    if (idx >= 4) { const b = upper[ri(0, upper.length - 1)]; E(UPPER_Y, b.x + b.w / 2, b.x + 10, b.x + b.w - 10, SP, -1, "flash"); E(GROUND_Y, ri(300, 900), 200, 1000, SP, 1, "flash"); }  // 손전등 더 일찍
-    if (idx >= 7) { const b = upper[ri(0, upper.length - 1)]; E(UPPER_Y, b.x + b.w / 2, b.x + 10, b.x + b.w - 10, SP, 1, "flash"); }   // 2번째 손전등
+    if (idx >= 4) { if (upper.length) { const b = upper[ri(0, upper.length - 1)]; E(UPPER_Y, b.x + b.w / 2, b.x + 10, b.x + b.w - 10, SP, -1, "flash"); } E(GROUND_Y, ri(300, 900), 200, 1000, SP, 1, "flash"); }  // 손전등
+    if (idx >= 7 && upper.length) { const b = upper[ri(0, upper.length - 1)]; E(UPPER_Y, b.x + b.w / 2, b.x + 10, b.x + b.w - 10, SP, 1, "flash"); }   // 2번째 손전등
     if (idx >= 8) E(GROUND_Y, ri(300, 1000), 20, WORLD_W - 20, 1.2, 1, "car");  // 후반 경찰차(사방 감시)
     // 5) 아이템(상호작용 → 겹침 방지)
     const addItem = (min, max, kind) => { const x = findFree(min, max, 13, 8); if (x != null) { ninjas.push({ x, y: GROUND_Y, kind, taken: false }); occupy(x, 13); } };
@@ -686,7 +698,7 @@ html, body {
     addItem(800, 1200, R() < 0.5 ? "time" : "smoke");
     if (R() < 0.6) addItem(1240, 1480, R() < 0.5 ? "smoke" : "time");
 
-    // 6) 길거리 장식(입간판·소형차·강아지) — 스팟/구조물 회피
+    // 6) 길거리 장식(입간판·소형차·강아지) — 실내엔 거리 장식 없음
     const clearDeco = (x, gap) => free(x, gap, 4) && props.every(q => Math.abs(q.x - x) > gap);
     const addProp = (kind, gap) => {
       for (let t = 0; t < 16; t++) {
@@ -694,8 +706,8 @@ html, body {
         if (clearDeco(x, gap)) { props.push({ kind, x, y: GROUND_Y, dir: R() < 0.5 ? -1 : 1, tint: R(), phase: R() * 6.28, mstate: "idle", mtimer: 0.5 + R() * 1.5, anim: 0 }); return; }
       }
     };
-    if (R() < 0.6) addProp("car", 40);                 // 소형 주차차량(장식)
-    for (let i = 0, n = ri(2, 3); i < n; i++) addProp("sign", 30);
+    if (!flat && R() < 0.6) addProp("car", 40);                 // 소형 주차차량(장식)
+    if (!flat) for (let i = 0, n = ri(2, 3); i < n; i++) addProp("sign", 30);
     // 강아지는 반드시 1마리 (스테이지3 입양 보장) — 배치 실패 시 빈 자리 강제 탐색
     addProp("dog", 26);
     if (!props.some(q => q.kind === "dog")) {
@@ -738,12 +750,13 @@ html, body {
   const rpick = (a) => a[Math.floor(Math.random() * a.length)];
 
   function makeCitizen(isComplainer, theme, noCycle) {
+    const subway = chapterOf(stageIdx) === 1;             // 지하철 챕터: 민원인=노란티+중절모
     const pool = CITIZEN_POOLS[theme] || ["normal"];
     let ctype = isComplainer ? "normal" : rpick(pool);
     if (noCycle && ctype === "cyclist") ctype = "normal";   // 한 스테이지 자전거 1인 제한
     let h = 14 + Math.floor(Math.random() * 4);
     let speed = 0.35 + Math.random() * 0.5;
-    let color = isComplainer ? "#7a6a4a" : rpick(CASUAL);
+    let color = isComplainer ? (subway ? "#f4d03f" : "#7a6a4a") : rpick(CASUAL);
     let hair = rpick(["#2b2230", "#3a2f28", "#1e1a22", "#4a3a2a"]);
     let tie = null, accent = null;
     if (!isComplainer) switch (ctype) {
@@ -757,7 +770,7 @@ html, body {
     }
     return {
       x: 120 + Math.random() * (WORLD_W - 240), lane: GROUND_Y,
-      dir: Math.random() < 0.5 ? -1 : 1, speed, color, hair, tie, accent, ctype, h,
+      dir: Math.random() < 0.5 ? -1 : 1, speed, color, hair, tie, accent, ctype, h, subway,
       phase: Math.random() * 6.28, isComplainer,
       pauseT: Math.random() * 2, turnT: 1 + Math.random() * 3,
       speechT: 0, cool: 0, moving: true, reportT: 0, reportX: 0,
@@ -774,6 +787,8 @@ html, body {
     };
     const L = buildLayout(idx, cfg);
     platforms = L.platforms; stairs = L.stairs; spots = L.spots; enforcers = L.enforcers; ninjas = L.ninjas; props = L.props; coins = L.coins;
+    const flags = stageFlags(idx);
+    if (flags.noEnf) enforcers = [];                    // 만원 객차: 단속반 없음
     // 고양이: 스테이지2(idx>=1)부터 1마리(흰색). 유저 근처에서 스폰 후 자유롭게 돌아다님. 30초 전엔 안 찢음.
     cats = idx >= 1 ? [{
       x: player.x + 50 + Math.random() * 50, lane: GROUND_Y, dir: Math.random() < 0.5 ? -1 : 1,
@@ -793,7 +808,7 @@ html, body {
     const theme = STAGES[idx].theme;
     let hasCyclist = false;
     for (let i = 0; i < 12; i++) {
-      const isComplainer = i < cfg.complainers;
+      const isComplainer = i < cfg.complainers && !flags.noComp;   // 만원/추운 칸: 민원인 없음
       const c = makeCitizen(isComplainer, theme, hasCyclist);   // 이미 자전거가 있으면 추가 자전거 금지
       if (c.ctype === "cyclist") hasCyclist = true;
       citizens.push(c);
@@ -1689,7 +1704,7 @@ html, body {
       }
     }
     // 조명(테마별) — 낮/아침엔 소등
-    const lit = !(STAGES[stageIdx].time === "day" || STAGES[stageIdx].time === "morning");
+    const lit = STAGES[stageIdx].theme === "subway" ? true : !(STAGES[stageIdx].time === "day" || STAGES[stageIdx].time === "morning");   // 지하는 항상 점등
     for (const lx of [140, 600, 1060, 1520]) drawLight(lx, P.lamp, P.glow, lit);
   }
 
@@ -2270,24 +2285,31 @@ html, body {
         ctx.fillRect(x - 4 + stride * amp + lean, y - 5, 3, 5);
         ctx.fillRect(x + 1 - stride * amp + lean, y - 5, 3, 5);
       }
-      // 민원인: 크고 잘 보이는 안경 (사이렌 대신)
+      // 민원인 식별: (차가운 도시) 큰 안경 / (지하철) 노란티 + 중절모
       if (c.isComplainer) {
-        const hy = y - c.h - 4;                          // 안경 높이(눈 위치)
-        ctx.fillStyle = "#1a1a22";                       // 검은 뿔테
-        ctx.fillRect(x - 5, hy - 1, 5, 5);
-        ctx.fillRect(x, hy - 1, 5, 5);
-        ctx.fillRect(x - 1, hy, 2, 1);                   // 브릿지
-        ctx.fillStyle = "#eef4ff";                       // 흰 렌즈
-        ctx.fillRect(x - 4, hy, 3, 3); ctx.fillRect(x + 1, hy, 3, 3);
-        ctx.fillStyle = "#222";                          // 눈동자
-        if (angry) {                                     // 화나면 눈 치켜뜸
-          ctx.fillRect(x - 3, hy + 1, 2, 1); ctx.fillRect(x + 2, hy + 1, 2, 1);
+        const hy = y - c.h - 4;
+        if (c.subway) {                                  // 중절모(페도라)
+          ctx.fillStyle = "#5a4226"; ctx.fillRect(x - 6, y - c.h - 6, 12, 2);   // 챙
+          ctx.fillRect(x - 4, y - c.h - 10, 8, 4);                              // 크라운
+          ctx.fillStyle = "#3a2a16"; ctx.fillRect(x - 4, y - c.h - 7, 8, 1);    // 밴드
+          ctx.fillStyle = "#222";                                               // 눈
+          if (angry) { ctx.fillRect(x - 3, hy + 1, 2, 1); ctx.fillRect(x + 2, hy + 1, 2, 1); }
+          else { ctx.fillRect(x - 3, hy + 1, 1, 1); ctx.fillRect(x + 2, hy + 1, 1, 1); }
         } else {
-          const look = Math.round(Math.sin(now / 360 + c.phase) * 1.2);
-          ctx.fillRect(clamp(x - 3 + look, x - 4, x - 2), hy + 1, 1, 1);
-          ctx.fillRect(clamp(x + 2 + look, x + 1, x + 3), hy + 1, 1, 1);
+          ctx.fillStyle = "#1a1a22";                     // 검은 뿔테
+          ctx.fillRect(x - 5, hy - 1, 5, 5);
+          ctx.fillRect(x, hy - 1, 5, 5);
+          ctx.fillRect(x - 1, hy, 2, 1);                 // 브릿지
+          ctx.fillStyle = "#eef4ff";                     // 흰 렌즈
+          ctx.fillRect(x - 4, hy, 3, 3); ctx.fillRect(x + 1, hy, 3, 3);
+          ctx.fillStyle = "#222";                        // 눈동자
+          if (angry) { ctx.fillRect(x - 3, hy + 1, 2, 1); ctx.fillRect(x + 2, hy + 1, 2, 1); }
+          else {
+            const look = Math.round(Math.sin(now / 360 + c.phase) * 1.2);
+            ctx.fillRect(clamp(x - 3 + look, x - 4, x - 2), hy + 1, 1, 1);
+            ctx.fillRect(clamp(x + 2 + look, x + 1, x + 3), hy + 1, 1, 1);
+          }
         }
-        // 화남 표시(핏대)
         if (angry) { ctx.fillStyle = "#ff4444"; ctx.fillRect(x + 4, y - c.h - 6, 3, 1); ctx.fillRect(x + 5, y - c.h - 8, 1, 3); }
       }
       if (dim && FILTER_OK) ctx.filter = "none";
@@ -2297,6 +2319,7 @@ html, body {
   }
 
   function drawEnforcers() {
+    const subway = chapterOf(stageIdx) === 1;            // 지하철: 단속반 = 역무원 복장
     for (const e of enforcers) {
       if (!vis(e.x, 60)) continue;                       // 화면 밖 단속반 건너뜀
       const x = e.x, y = e.lane;
@@ -2335,13 +2358,15 @@ html, body {
           if (e.dir === 1) ctx.fillRect(x, y - 18, vd, 20);
           else ctx.fillRect(x - vd, y - 18, vd, 20);
         }
-        ctx.fillStyle = "#26407a"; ctx.fillRect(x - 6, y - 20, 12, 18);
+        const uni = subway ? "#3a4350" : "#26407a", cap = subway ? "#20262f" : "#16284e";
+        ctx.fillStyle = uni; ctx.fillRect(x - 6, y - 20, 12, 18);
         ctx.fillStyle = "#e7c39a"; ctx.fillRect(x - 4, y - 26, 8, 6);
-        ctx.fillStyle = "#16284e"; ctx.fillRect(x - 6, y - 28, 12, 4);
-        ctx.fillStyle = "#16284e"; ctx.fillRect(x - 7, y - 25, 14, 2);
+        ctx.fillStyle = cap; ctx.fillRect(x - 6, y - 28, 12, 4);
+        ctx.fillStyle = cap; ctx.fillRect(x - 7, y - 25, 14, 2);
+        if (subway) { ctx.fillStyle = "#caa23a"; ctx.fillRect(x - 6, y - 26, 12, 1); ctx.fillRect(x - 4, y - 16, 2, 2); }  // 역무원 모자 금색 띠 + 명찰
         ctx.fillStyle = "#fff"; ctx.fillRect(x + (e.dir === 1 ? 1 : -3), y - 24, 2, 2);
         const step = Math.sin(performance.now() / 120) > 0 ? 2 : -2;
-        ctx.fillStyle = "#16284e";
+        ctx.fillStyle = cap;
         ctx.fillRect(x - 5, y - 2, 4, 4 + step); ctx.fillRect(x + 1, y - 2, 4, 4 - step);
       }
       // 단속반 머리 위 말풍선: 난감 > 경고 > 쎄한느낌 > 돌아봄(?)
