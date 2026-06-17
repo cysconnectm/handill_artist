@@ -79,6 +79,15 @@ html, body {
   ctx.imageSmoothingEnabled = false;  // 사각형 픽셀 아트는 또렷하게
   ctx.scale(RS, RS);                  // 이후 모든 그리기는 디자인 좌표(480×270) 기준
 
+  // ctx.filter(brightness) 지원 여부 — 구버전 모바일 Safari 등은 미지원이라 무시됨.
+  // 미지원 시 '반투명 검정 오버레이'로 동일한 어둡기를 재현(brightness(f) ≈ 검정 alpha(1-f)).
+  const FILTER_OK = !window.FORCE_NOFILTER && (() => {
+    try { ctx.filter = "brightness(0.5)"; const ok = ctx.filter === "brightness(0.5)"; ctx.filter = "none"; return ok; }
+    catch (e) { return false; }
+  })();
+  const DIM6 = "rgba(0,0,0,0.4)";     // brightness(0.6)
+  const DIM78 = "rgba(0,0,0,0.22)";   // brightness(0.78)
+
   const FONT = "Galmuri11";           // 한글 픽셀 폰트
   // 폰트 로드 후 첫 렌더가 깨지지 않도록 미리 적재
   if (document.fonts && document.fonts.load) {
@@ -1435,7 +1444,7 @@ html, body {
     }
 
     // 원경 건물 + 테마 배경물은 약간 어둡게(뒤로 물러나게)
-    ctx.filter = "brightness(0.78)";
+    if (FILTER_OK) ctx.filter = "brightness(0.78)";
     // 원경 건물 (테마별 높이/폭)
     const tall = S.theme === "office" || S.theme === "downtown";
     const bw = tall ? 44 : 56, sp = bw + 14, base = tall ? 92 : 52, vary = tall ? 70 : 44;
@@ -1446,10 +1455,11 @@ html, body {
       ctx.fillStyle = S.win;
       for (let wy = VH - bh + 8; wy < VH - 10; wy += 12)
         for (let wx = sx + 6; wx < sx + bw - 6; wx += 10) ctx.fillRect(wx, wy, 4, 5);
+      if (!FILTER_OK) { ctx.fillStyle = DIM78; ctx.fillRect(sx, VH - bh, bw, bh); }   // filter 미지원 폴백
     });
 
     drawThemeAccents(S.theme);
-    ctx.filter = "none";
+    if (FILTER_OK) ctx.filter = "none";
   }
 
   // 스테이지 타이틀에 맞는 시그니처 배경 그래픽 (패럴랙스 0.45)
@@ -1948,7 +1958,7 @@ html, body {
       if (q.kind === "dog") continue;               // 강아지는 별도 패스(스팟 앞)
       const x = q.x, y = q.y;
       const dim = true;                             // 장식(차·트럭·버스·입간판)은 어둡게
-      ctx.filter = "brightness(0.6)";
+      if (FILTER_OK) ctx.filter = "brightness(0.6)";
       if (q.kind === "car") {
         const cols = ["#b5494a", "#3a6ea5", "#caa94a", "#3f8a5a", "#6a6f7a", "#9a9aa6"];
         const col = cols[Math.floor(q.tint * cols.length) % cols.length];
@@ -1972,7 +1982,14 @@ html, body {
         ctx.fillStyle = "rgba(40,40,40,0.5)";                                          // 글자 줄
         for (let i = 0; i < 3; i++) ctx.fillRect(x - 5, y - 15 + i * 4, 9, 1);
       }
-      if (dim) ctx.filter = "none";
+      if (FILTER_OK) ctx.filter = "none";
+      else {   // filter 미지원 폴백: 장식 영역에 검정 오버레이
+        let bx2, by2, bw2, bh2;
+        if (q.kind === "car") { bx2 = x - 19; by2 = y - 18; bw2 = 38; bh2 = 18; }
+        else if (q.kind === "truck" || q.kind === "bus") { const w = q.kind === "truck" ? 92 : 100, h = q.kind === "truck" ? 26 : 28, b = x - w / 2, t = GROUND_Y - h - 4; bx2 = b - 2; by2 = t; bw2 = w + 4; bh2 = GROUND_Y - t + 2; }
+        else { bx2 = x - 9; by2 = y - 24; bw2 = 18; bh2 = 24; }   // sign
+        ctx.fillStyle = DIM6; ctx.fillRect(bx2, by2, bw2, bh2);
+      }
     }
   }
 
@@ -2129,7 +2146,7 @@ html, body {
         ctx.fillRect(c.x - r, c.lane - 16, r * 2, 10);
       }
       const dim = !c.isComplainer;                       // 민원인(상호작용) 외 행인은 어둡게
-      if (dim) ctx.filter = "brightness(0.6)";
+      if (dim && FILTER_OK) ctx.filter = "brightness(0.6)";
       // 자전거(타는 사람)는 몸 아래에 자전거 먼저
       if (c.ctype === "cyclist") drawBike(x, c.lane, c.dir);
       const by = c.ctype === "cyclist" ? y - 7 : y;        // 자전거는 안장 위에 앉음
@@ -2175,7 +2192,7 @@ html, body {
         // 화남 표시(핏대)
         if (angry) { ctx.fillStyle = "#ff4444"; ctx.fillRect(x + 4, y - c.h - 6, 3, 1); ctx.fillRect(x + 5, y - c.h - 8, 1, 3); }
       }
-      if (dim) ctx.filter = "none";
+      if (dim) { if (FILTER_OK) ctx.filter = "none"; else { ctx.fillStyle = DIM6; ctx.fillRect(c.x - 9, c.lane - c.h - 11, 18, c.h + 13); } }   // filter 미지원 폴백
       // 신고 말풍선 (2배 크기)
       if (angry) drawSpeech(x, y - c.h - 12, "여기 전단지 붙이지 마세요!", 2, "#c81e1e");
     }
