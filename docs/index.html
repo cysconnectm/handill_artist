@@ -189,12 +189,39 @@ html, body {
       pal: { gnd: "#52525c", gtop: "#6e6e7c", tile: "#5e5e6a", wall: "#54545f", ledge: "#70707e", win2: "rgba(220,225,238,0.35)", lamp: "flood", glow: "235,240,255" } },
     { name: "청와대", time: "night", sky: ["#0a1020", "#13233a"], theme: "bluehouse", far: "#16243a", win: "rgba(180,210,255,0.20)",
       pal: { gnd: "#20283a", gtop: "#3a4a6a", tile: "#7a2a2a", wall: "#243a52", ledge: "#3a6ea5", win2: "rgba(255,235,180,0.30)", lamp: "lanternB", glow: "150,200,255" } },
+
+    // === 2챕터: 지하철 (객차 안으로 진입 → 다음 역까지) — theme:"subway", line=호선 색 ===
+    { name: "1호선 승차", time: "subway", sky: ["#0b0d15", "#191c28"], theme: "subway", line: "#0052A4", far: "#161925", win: "rgba(150,180,220,0.10)",
+      pal: { gnd: "#3a3d46", gtop: "#52555f", tile: "#2e3038", wall: "#2a2d36", ledge: "#0052A4", win2: "rgba(150,180,220,0.12)", lamp: "subwaylight", glow: "230,240,255" } },
+    { name: "2호선 순환", time: "subway", sky: ["#0a0f0c", "#161f1a"], theme: "subway", line: "#00A84D", far: "#15201a", win: "rgba(160,210,180,0.10)",
+      pal: { gnd: "#3a3f3c", gtop: "#525a55", tile: "#2e322f", wall: "#2a302c", ledge: "#00A84D", win2: "rgba(160,210,180,0.12)", lamp: "subwaylight", glow: "230,245,235" } },
+    { name: "3호선 환승", time: "subway", sky: ["#140e09", "#241a12"], theme: "subway", line: "#EF7C1C", far: "#251a12", win: "rgba(240,180,120,0.10)",
+      pal: { gnd: "#433d36", gtop: "#5e544a", tile: "#332e28", wall: "#302a24", ledge: "#EF7C1C", win2: "rgba(240,190,130,0.12)", lamp: "subwaylight", glow: "255,230,200" } },
+    { name: "4호선 급행", time: "subway", sky: ["#08111a", "#13202b"], theme: "subway", line: "#00A5DE", far: "#13202b", win: "rgba(150,200,230,0.10)",
+      pal: { gnd: "#3a4046", gtop: "#525a60", tile: "#2e3338", wall: "#2a3036", ledge: "#00A5DE", win2: "rgba(150,205,235,0.12)", lamp: "subwaylight", glow: "225,240,250" } },
+    { name: "5호선 만원", time: "subway", sky: ["#100c16", "#1d1726"], theme: "subway", line: "#996CAC", far: "#1c1726", win: "rgba(190,170,210,0.10)",
+      pal: { gnd: "#3e3a44", gtop: "#58525e", tile: "#312e36", wall: "#2d2a32", ledge: "#996CAC", win2: "rgba(195,175,215,0.12)", lamp: "subwaylight", glow: "235,228,245" } },
+    { name: "6호선 막차", time: "subway", sky: ["#120e08", "#211a10"], theme: "subway", line: "#CD7C2F", far: "#201a12", win: "rgba(220,180,120,0.08)",
+      pal: { gnd: "#423d35", gtop: "#5c5349", tile: "#322d27", wall: "#2e2a23", ledge: "#CD7C2F", win2: "rgba(225,185,130,0.10)", lamp: "subwaylight", glow: "245,225,195" } },
+    { name: "7호선 심야", time: "subway", sky: ["#0d0f08", "#181d10"], theme: "subway", line: "#747F00", far: "#181d10", win: "rgba(190,200,120,0.08)",
+      pal: { gnd: "#3d3f36", gtop: "#56594b", tile: "#2f3128", wall: "#2b2d24", ledge: "#747F00", win2: "rgba(195,205,130,0.10)", lamp: "subwaylight", glow: "235,240,205" } },
+    { name: "8호선 종점행", time: "subway", sky: ["#140810", "#23121d"], theme: "subway", line: "#E6186C", far: "#22121d", win: "rgba(235,140,185,0.08)",
+      pal: { gnd: "#433a3f", gtop: "#5e5057", tile: "#332a30", wall: "#2f2a2d", ledge: "#E6186C", win2: "rgba(240,150,190,0.10)", lamp: "subwaylight", glow: "250,215,230" } },
+    { name: "공항철도 직통", time: "subway", sky: ["#080f18", "#121e2c"], theme: "subway", line: "#0090D2", far: "#121e2c", win: "rgba(140,195,230,0.12)",
+      pal: { gnd: "#3a4046", gtop: "#525c64", tile: "#2e343a", wall: "#2a3138", ledge: "#0090D2", win2: "rgba(150,205,240,0.14)", lamp: "subwaylight", glow: "220,240,252" } },
+    { name: "자기부상 시운전", time: "subway", sky: ["#0c0e14", "#1b2030"], theme: "subway", line: "#7da0c8", far: "#1a2030", win: "rgba(190,210,240,0.14)",
+      pal: { gnd: "#3c4250", gtop: "#56607a", tile: "#30343f", wall: "#2c3340", ledge: "#7da0c8", win2: "rgba(195,215,245,0.16)", lamp: "subwaylight", glow: "230,242,255" } },
   ];
+  // 챕터: 0=차가운 도시(0~9), 1=지하철(10~19). 차가운 도시 클리어 후 지하철 이어서 해금.
+  const CHAPTERS = [{ name: "차가운 도시", start: 0 }, { name: "지하철", start: 10 }];
+  const chapterOf = (idx) => idx >= 10 ? 1 : 0;
   function stageCfg(idx) {
+    const ci = idx % 10;                                 // 챕터 내 인덱스로 난이도 곡선(챕터마다 리셋)
+    const sub = idx >= 10;                               // 지하철은 살짝 더 빡세게
     return {
-      enfSpeedMul: 1 + idx * 0.10,                       // 단계마다 단속 빨라짐(레벨링 강화)
-      complainers: Math.min(2 + Math.floor(idx * 0.8), 9), // 민원인 수(1스테이지=2 → 후반 급증)
-      spotMul: 1 + idx * 0.15,                           // 고급 거리일수록 점수↑
+      enfSpeedMul: 1 + ci * 0.10 + (sub ? 0.15 : 0),
+      complainers: Math.min(2 + Math.floor(ci * 0.8) + (sub ? 1 : 0), 9),
+      spotMul: 1 + ci * 0.15 + (sub ? 0.3 : 0),
     };
   }
 
@@ -224,6 +251,8 @@ html, body {
   let pauseBtns = [];                    // 일시정지 메뉴 버튼 히트박스
   const STAGE_BOX = { x: VW / 2 - 96, y: 156, w: 192, h: 30 };  // 타이틀 '현재 스테이지' → 선택
   let selectCells = [], selectMaps = null;  // 스테이지 선택 셀/미니맵 캐시
+  let selectChapter = 0;                     // 선택 화면 현재 챕터(0=차가운 도시, 1=지하철)
+  const CH_TAB = [{ x: VW / 2 - 122, y: 32, w: 118, h: 18 }, { x: VW / 2 + 4, y: 32, w: 118, h: 18 }];
   let selectConfirm = null;                  // 스테이지 선택 확인 다이얼로그(선택된 idx)
   const CONF_YES = { x: VW / 2 - 86, y: 156, w: 76, h: 30 };   // '네'
   const CONF_NO  = { x: VW / 2 + 10, y: 156, w: 76, h: 30 };   // '아니오'
@@ -489,7 +518,7 @@ html, body {
       if (hit(PLAY_BTN, mx, my)) { Audio.sfx("button"); startIntro(); }
       else if (hit(RANK_BTN, mx, my)) { Audio.sfx("button"); recordsPage = 0; state = STATE.RECORDS; refreshBoard(0); }
       else if (hit(SHOP_BTN, mx, my)) { Audio.sfx("button"); shopMsg = ""; state = STATE.SHOP; }
-      else if (hit(STAGE_BOX, mx, my)) { Audio.sfx("button"); selectConfirm = null; state = STATE.SELECT; }
+      else if (hit(STAGE_BOX, mx, my)) { Audio.sfx("button"); selectConfirm = null; selectChapter = chapterOf(progress); state = STATE.SELECT; }
     } else if (state === STATE.SHOP) {
       if (hit(BACK_BTN, mx, my)) { Audio.sfx("button"); state = STATE.MENU; }
       else for (let i = 0; i < SHOP_ITEMS.length; i++) { if (hit(SHOP_BUY[i], mx, my)) { buyItem(SHOP_ITEMS[i]); break; } }
@@ -498,6 +527,8 @@ html, body {
         if (hit(CONF_YES, mx, my)) { Audio.sfx("button"); const idx = selectConfirm; selectConfirm = null; startIntro(idx); }
         else if (hit(CONF_NO, mx, my)) { Audio.sfx("button"); selectConfirm = null; }
       } else if (hit(BACK_BTN, mx, my)) { Audio.sfx("button"); state = STATE.MENU; }
+      else if (hit(CH_TAB[0], mx, my)) { Audio.sfx("button"); selectChapter = 0; }
+      else if (hit(CH_TAB[1], mx, my) && CHAPTERS[1].start <= progress) { Audio.sfx("button"); selectChapter = 1; }   // 지하철 탭(해금 시)
       else for (const c of selectCells) {
         if (!c.locked && hit(c, mx, my)) { Audio.sfx("button"); selectConfirm = c.idx; break; }  // '전단지를 붙이시겠습니까?'
       }
@@ -695,6 +726,7 @@ html, body {
     downtown: ["suit", "normal", "runner", "cyclist", "punk", "normal"],
     gov:      ["suit", "suit", "suit", "suit", "normal", "elder"],
     bluehouse:["suit", "suit", "normal", "elder", "suit"],
+    subway:   ["normal", "suit", "elder", "backpack", "normal", "punk"],   // 객차 안 승객 분포
   };
   const SUIT_COLORS = ["#2b3340", "#384152", "#43474f", "#30353e", "#4a4034"];
   const TIE_COLORS  = ["#c83a3a", "#2a5fb0", "#1f9d55", "#b08a1f", "#7a3aa8", "#c05a2a", "#2aa0a0", "#b03a6a"];
@@ -1459,6 +1491,7 @@ html, body {
     const g = c.createLinearGradient(0, 0, 0, VH);
     g.addColorStop(0, S.sky[0]); g.addColorStop(1, S.sky[1]);
     c.fillStyle = g; c.fillRect(0, 0, VW, VH);
+    if (S.theme === "subway") return;        // 지하(터널)는 천체 없음 — 어두운 배경만
     const dark = S.time === "night" || S.time === "dusk";
     const warmLow = S.time === "dawn" || S.time === "sunset";
     if (dark) {
@@ -1486,6 +1519,7 @@ html, body {
     const S = STAGES[stageIdx];
     if (skyStage !== stageIdx) { renderSkyCache(S); skyStage = stageIdx; }   // 스테이지 바뀔 때만 재생성
     ctx.drawImage(skyCanvas, 0, 0, VW, VH);
+    if (S.theme === "subway") { drawSubwayBack(S); return; }                 // 지하철: 터널 배경(원경 도시 없음)
 
     // 원경 건물 + 테마 배경물은 약간 어둡게(뒤로 물러나게)
     if (FILTER_OK) ctx.filter = "brightness(0.78)";
@@ -1504,6 +1538,23 @@ html, body {
 
     drawThemeAccents(S.theme);
     if (FILTER_OK) ctx.filter = "none";
+  }
+
+  // 지하철 배경: 객차 창 너머 터널 — 빠르게 스쳐가는 조명(모션감) + 케이블 + 호선 띠
+  function drawSubwayBack(S) {
+    const hz = VH - 24;
+    ctx.fillStyle = S.far; ctx.fillRect(0, 40, VW, hz - 40);                   // 터널 벽(원경)
+    ctx.fillStyle = "rgba(0,0,0,0.12)";                                        // 가로 줄눈
+    for (let y = 56; y < hz; y += 16) ctx.fillRect(0, y, VW, 1);
+    tileX(70, 1.0, (sx) => {                                                   // 스쳐가는 터널 조명(빠른 패럴랙스=모션)
+      ctx.fillStyle = "rgba(255,250,220,0.10)"; ctx.fillRect(sx + 30, 52, 4, hz - 64);
+    });
+    tileX(170, 0.5, (sx) => {                                                  // 천장 케이블/파이프
+      ctx.strokeStyle = "rgba(0,0,0,0.45)"; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(sx, 58); ctx.quadraticCurveTo(sx + 85, 68, sx + 170, 58); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sx, 70); ctx.quadraticCurveTo(sx + 85, 82, sx + 170, 70); ctx.stroke();
+    });
+    ctx.fillStyle = S.line; ctx.fillRect(0, 44, VW, 3);                        // 상단 호선 색 띠
   }
 
   // 스테이지 타이틀에 맞는 시그니처 배경 그래픽 (패럴랙스 0.45)
@@ -1614,6 +1665,9 @@ html, body {
           ctx.fillStyle = P.tile; const [a, b] = tileRange(pl.x, pl.w, 8); for (let x = a; x < b; x += 8) ctx.fillRect(x, pl.y + 6, 4, 3);
         } else if (theme === "neon") {                       // 젖은 노면 반사 줄
           ctx.fillStyle = "rgba(120,220,255,0.06)"; const [a, b] = tileRange(pl.x, pl.w, 6); for (let x = a; x < b; x += 6) ctx.fillRect(x, pl.y + 6, 1, VH - pl.y - 8);
+        } else if (theme === "subway") {                     // 객차 바닥(안전선 + 미끄럼방지 줄)
+          ctx.fillStyle = "rgba(255,220,80,0.5)"; ctx.fillRect(pl.x, pl.y + 3, pl.w, 1);   // 노란 안전선
+          ctx.fillStyle = P.tile; const [a, b] = tileRange(pl.x, pl.w, 12); for (let x = a; x < b; x += 12) ctx.fillRect(x, pl.y + 8, 8, 2);
         } else {                                             // 보도블럭
           ctx.fillStyle = P.tile; const [a, b] = tileRange(pl.x, pl.w, 16); for (let x = a; x < b; x += 16) ctx.fillRect(x, pl.y + 6, 14, 2);
         }
@@ -1670,6 +1724,10 @@ html, body {
       ctx.fillStyle = "#999"; ctx.fillRect(x - 5, gy - 70, 16, 8);
       ctx.fillStyle = bulb; ctx.fillRect(x - 3, gy - 66, 10, 3);
       halo(x + 2, gy - 60, 70, 0.14);
+    } else if (type === "subwaylight") {         // 객차 천장 형광등
+      ctx.fillStyle = "#cfd6e0"; ctx.fillRect(x - 16, gy - 98, 32, 4);
+      ctx.fillStyle = lit ? `rgba(${glow},0.95)` : "#888"; ctx.fillRect(x - 15, gy - 96, 30, 2);
+      halo(x + 0, gy - 84, 58, 0.12);
     } else if (type === "garden") {              // 정원등(낮고 따뜻)
       ctx.fillStyle = "#3a3a30"; ctx.fillRect(x, gy - 30, 3, 30);
       ctx.fillStyle = bulb; ctx.fillRect(x - 3, gy - 36, 9, 7);
@@ -2715,39 +2773,46 @@ html, body {
     if (!selectMaps) selectMaps = STAGES.map((s, i) => buildLayout(i, { enfSpeedMul: 1, spotMul: 1 }));
     const cx = VW / 2;
     ctx.fillStyle = "#0c0f1c"; ctx.fillRect(0, 0, VW, VH);
-    ctx.textAlign = "center"; ctx.fillStyle = "#ffd24d"; ctx.font = "15px Galmuri11, monospace";
-    ctx.fillText("거리 선택", cx, 26);
+    ctx.textAlign = "center"; ctx.fillStyle = "#ffd24d"; ctx.font = "14px Galmuri11, monospace";
+    ctx.fillText("거리 선택", cx, 20);
+
+    // 챕터 탭 (지하철은 차가운 도시 클리어 후 해금)
+    for (let ch = 0; ch < CHAPTERS.length; ch++) {
+      const tb = CH_TAB[ch], chLocked = CHAPTERS[ch].start > progress, on = ch === selectChapter;
+      ctx.fillStyle = on ? "#2a3550" : "#1a1d28"; ctx.fillRect(tb.x, tb.y, tb.w, tb.h);
+      ctx.strokeStyle = on ? "#ffd24d" : "#3a3f4e"; ctx.lineWidth = 1; ctx.strokeRect(tb.x + 0.5, tb.y + 0.5, tb.w - 1, tb.h - 1);
+      ctx.fillStyle = chLocked ? "#6a6a72" : on ? "#ffd24d" : "#9fb8d8"; ctx.font = "10px Galmuri11, monospace"; ctx.textAlign = "center";
+      ctx.fillText((chLocked ? "🔒 " : "") + CHAPTERS[ch].name, tb.x + tb.w / 2, tb.y + 13);
+    }
 
     selectCells = [];
-    const cols = 5, cw = 65, th = 52, gx = 12, rowH = 86;   // 썸네일 높이 th, 행 간격 rowH(이름·점수 외부 공간 포함)
-    const x0 = (VW - (cols * cw + (cols - 1) * gx)) / 2, y0 = 62;  // 썸네일 윗변(이름은 그 위)
-    // 스네이크 배치: 윗줄 좌→우, 아랫줄 우→좌 (1→10 한 동선)
+    const base = selectChapter * 10, n = 10;
+    const cols = 5, cw = 65, th = 50, gx = 12, rowH = 78;
+    const x0 = (VW - (cols * cw + (cols - 1) * gx)) / 2, y0 = 70;
     const pos = [];
-    for (let i = 0; i < STAGES.length; i++) {
-      const row = (i / cols) | 0;
-      const col = row % 2 === 0 ? (i % cols) : (cols - 1 - (i % cols));
+    for (let li = 0; li < n; li++) {
+      const row = (li / cols) | 0;
+      const col = row % 2 === 0 ? (li % cols) : (cols - 1 - (li % cols));
       pos.push({ ax: x0 + col * (cw + gx), ay: y0 + row * rowH });
     }
-    // 1) 흐름 화살표(썸네일 사이, 진행 방향)
+    // 흐름 화살표(진행 방향)
     ctx.fillStyle = "#ffd24d"; ctx.font = "12px Galmuri11, monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    for (let i = 0; i < pos.length - 1; i++) {
-      const a = pos[i], b = pos[i + 1];
+    for (let li = 0; li < n - 1; li++) {
+      const a = pos[li], b = pos[li + 1];
       const amx = (a.ax + b.ax) / 2 + cw / 2, amy = (a.ay + b.ay) / 2 + th / 2;
       ctx.fillText(a.ay === b.ay ? (b.ax > a.ax ? "▸" : "◂") : "▾", amx, amy);
     }
     ctx.textBaseline = "alphabetic";
-    // 2) 셀
-    for (let i = 0; i < STAGES.length; i++) {
-      const ax = pos[i].ax, ay = pos[i].ay, ccx = ax + cw / 2;
+    // 셀(현재 챕터 10개)
+    for (let li = 0; li < n; li++) {
+      const i = base + li, ax = pos[li].ax, ay = pos[li].ay, ccx = ax + cw / 2;
       const locked = i > progress, S = STAGES[i], L = selectMaps[i];
-      // 거리 이름 — 썸네일 외부 위
-      ctx.save(); ctx.beginPath(); ctx.rect(ax - 6, ay - 14, cw + 12, 12); ctx.clip();
+      ctx.save(); ctx.beginPath(); ctx.rect(ax - 6, ay - 13, cw + 12, 12); ctx.clip();
       ctx.textAlign = "center"; ctx.fillStyle = locked ? "#8a8a92" : "#fff"; ctx.font = "8px Galmuri11, monospace";
       ctx.fillText((i + 1) + ". " + S.name, ccx, ay - 4);
       ctx.restore();
-      // 썸네일(미니맵)
       ctx.fillStyle = S.sky[0]; ctx.fillRect(ax, ay, cw, th);
-      ctx.fillStyle = S.sky[1]; ctx.fillRect(ax, ay + th - 20, cw, 20);
+      ctx.fillStyle = S.sky[1]; ctx.fillRect(ax, ay + th - 18, cw, 18);
       const scX = (cw - 6) / WORLD_W, scY = (th - 8) / 270, mx0 = ax + 3, my0 = ay + 4;
       ctx.fillStyle = "rgba(0,0,0,0.5)";
       for (const pl of L.platforms) ctx.fillRect(mx0 + pl.x * scX, my0 + pl.y * scY, pl.y === GROUND_Y ? cw - 6 : Math.max(3, pl.w * scX), 2);
@@ -2755,14 +2820,13 @@ html, body {
       for (const sp of L.spots) ctx.fillRect(mx0 + sp.x * scX - 1, my0 + sp.y * scY - 3, 2, 3);
       if (locked) {
         ctx.fillStyle = "rgba(6,8,14,0.62)"; ctx.fillRect(ax, ay, cw, th);
-        const lx = ccx, ly = ay + th / 2 - 2;                      // 자물쇠 중앙
+        const lx = ccx, ly = ay + th / 2 - 2;
         ctx.fillStyle = "#dde4ee"; ctx.fillRect(lx - 6, ly, 12, 9);
         ctx.strokeStyle = "#dde4ee"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(lx, ly, 4, Math.PI, 0); ctx.stroke();
         ctx.fillStyle = "#2a2a34"; ctx.fillRect(lx - 1, ly + 3, 2, 4);
       }
       ctx.strokeStyle = locked ? "#3a3a44" : (i === progress ? "#ffd24d" : "#9fb8d8"); ctx.lineWidth = i === progress ? 2 : 1;
       ctx.strokeRect(ax + 0.5, ay + 0.5, cw - 1, th - 1);
-      // 최고 점수 — 썸네일 외부 아래
       ctx.textAlign = "center"; ctx.font = "7px Galmuri11, monospace";
       if (locked) { ctx.fillStyle = "#8a8a92"; ctx.fillText("잠김", ccx, ay + th + 9); }
       else { const e = best.stageEarn[i] || 0; ctx.fillStyle = "#5cff9e"; ctx.fillText(e > 0 ? "최고 ₩" + e.toLocaleString() : "기록 없음", ccx, ay + th + 9); }
