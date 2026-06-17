@@ -948,15 +948,15 @@ html, body {
     const action = (keys["j"] || keys["J"] || keys["e"] || keys["E"]) && p.stunT <= 0;
     const cx = p.x + p.w / 2;
     if (action) {
-      if (p.onGround && Math.abs(cx - BOOTH.x) < BOOTH_R) {
+      if (p.onGround && Math.abs(cx - BOOTH.x) < BOOTH_R && Math.abs(p.y - BOOTH.y) < 18) {
         if (consumeAction()) startCall();
       } else {
         const item = ninjas.find(n => !n.taken && Math.abs(cx - n.x) < 16 && Math.abs(p.y - n.y) < 20);
         if (item) {
           if (consumeAction()) { item.taken = true; useItem(item.kind); }
         } else {
-          const pdog = p.onGround && props.find(q => q.pettable && Math.abs(cx - q.x) < 20);
-          const fcat = cats && cats.find(c => !c.done && Math.abs(cx - c.x) < 22);
+          const pdog = p.onGround && props.find(q => q.pettable && Math.abs(cx - q.x) < 20 && Math.abs(p.y - q.y) < 18);
+          const fcat = cats && cats.find(c => !c.done && Math.abs(cx - c.x) < 22 && Math.abs(p.y - c.lane) < 18);
           if (pdog) { if (consumeAction()) petDog(pdog); }
           else if (fcat) { if (consumeAction()) feedCat(fcat); }   // 고양이에게 츄르 주기(없으면 '츄르가 없다')
           else tryAttach();
@@ -1882,7 +1882,7 @@ html, body {
     // 상호작용 안내
     const p = player;
     if (state === STATE.PLAYING) {
-      const inR = Math.abs((p.x + p.w / 2) - x) < BOOTH_R;
+      const inR = Math.abs((p.x + p.w / 2) - x) < BOOTH_R && Math.abs(p.y - y) < 18;
       if (mobile()) mobilePrompt(x, y - h - 16, "보고하기", inR);
       else if (inR) { const allDone = spots.every(s => s.filled >= s.slots); outlineText(allDone ? "[J] 통화 · 완료!" : "[J] 통화 · 정산", x, y - h - 16, allDone ? "#5cff9e" : "#7fffd4", 8); }
     }
@@ -1939,7 +1939,7 @@ html, body {
         ctx.fillStyle = "#0a0a12"; ctx.fillRect(n.x - 4, cy - 2, 8, 2);
       }
       // 상호작용 표기 (볼드)
-      const near = Math.abs(pcx - n.x) < 16;
+      const near = Math.abs(pcx - n.x) < 16 && Math.abs(player.y - n.y) < 20;
       if (mobile()) mobilePrompt(n.x, cy - 14, K.label, near && state === STATE.PLAYING);
       else if (near && state === STATE.PLAYING) outlineText("[J] " + K.label, n.x, cy - 14, K.col, 8);
       else outlineText("[J]", n.x, cy - 12, K.col, 7);
@@ -2007,7 +2007,7 @@ html, body {
       const col = q.tint < 0.5 ? "#a9763f" : q.tint < 0.8 ? "#5a4a3a" : "#d8d2c4";
       drawDogSprite(q.x, q.y, col, q.dir, q.anim, q.moving);
       if (q.pettable && state === STATE.PLAYING) {
-        const npet = Math.abs((player.x + player.w / 2) - q.x) < 20;
+        const npet = Math.abs((player.x + player.w / 2) - q.x) < 20 && Math.abs(player.y - q.y) < 18;
         if (mobile()) mobilePrompt(q.x, q.y - 22, "쓰다듬기", npet);
         else outlineText(npet ? "[J] 쓰다듬기" : "[J]", q.x, q.y - 22, "#ffd24d", npet ? 8 : 7);
       }
@@ -2061,7 +2061,7 @@ html, body {
       }
       // 머리 위 [J] 항상 표시(가까이선 '[J] 츄르')
       else if (!c.done && state === STATE.PLAYING) {
-        const np = Math.abs((player.x + player.w / 2) - x) < 22;
+        const np = Math.abs((player.x + player.w / 2) - x) < 22 && Math.abs(player.y - c.lane) < 18;
         if (mobile()) mobilePrompt(x, y - 20, "츄르주기", np);
         else outlineText(np ? "고양이 [J] 츄르" : "고양이 [J]", x, y - 20, "#9fe0ff", np ? 8 : 7);
       }
