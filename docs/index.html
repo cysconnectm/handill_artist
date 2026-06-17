@@ -81,9 +81,16 @@ html, body {
 
   // ctx.filter(brightness) 지원 여부 — 구버전 모바일 Safari 등은 미지원이라 무시됨.
   // 미지원 시 '반투명 검정 오버레이'로 동일한 어둡기를 재현(brightness(f) ≈ 검정 alpha(1-f)).
+  // 실제로 그려서 판정(속성만 받고 적용 안 하는 웹뷰가 있어 픽셀로 확인).
   const FILTER_OK = !window.FORCE_NOFILTER && (() => {
-    try { ctx.filter = "brightness(0.5)"; const ok = ctx.filter === "brightness(0.5)"; ctx.filter = "none"; return ok; }
-    catch (e) { return false; }
+    try {
+      const t = document.createElement("canvas"); t.width = t.height = 4;
+      const tc = t.getContext("2d");
+      tc.filter = "brightness(0)";                       // 흰색을 검정으로(적용되면 0, 무시되면 255)
+      tc.fillStyle = "#fff"; tc.fillRect(0, 0, 4, 4);
+      const px = tc.getImageData(0, 0, 1, 1).data;
+      return px[0] < 40;
+    } catch (e) { return false; }
   })();
   const DIM6 = "rgba(0,0,0,0.4)";     // brightness(0.6)
   const DIM78 = "rgba(0,0,0,0.22)";   // brightness(0.78)
